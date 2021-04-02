@@ -26,7 +26,9 @@ pcDiffPop <- function(sc.object,
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
-    row <- c(i,sqrt(sum(vals$beta^2)),min(vals$p))
+    stat <- -2*sum(log(vals$p))
+    pval <- pchisq(stat,df=2*ncol(pca),lower.tail = FALSE)
+    row <- c(i,sqrt(sum(vals$beta^2)),pval)
     res <- rbind(res,row)
   }
   res <- data.frame(row.names=res[,1],
