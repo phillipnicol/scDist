@@ -5,6 +5,7 @@ pcDiffPop <- function(sc.object,
                       random.effects,
                       clusters) {
   pca <- sc.object@reductions$pca@cell.embeddings
+  npcs <- ncol(pca)
   design <- makeDesign(fixed.effects,random.effects)
 
   #get data
@@ -26,8 +27,10 @@ pcDiffPop <- function(sc.object,
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
-    stat <- -2*sum(log(vals$p))
-    pval <- pchisq(stat,df=2*ncol(pca),lower.tail = FALSE)
+    pval <- min(p.adjust(vals$p, method="holm"))
+    #Fisher's test
+    #stat <- -2*sum(log(vals$p))
+    #pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
     row <- c(i,sqrt(sum(vals$beta^2)),pval)
     res <- rbind(res,row)
   }
