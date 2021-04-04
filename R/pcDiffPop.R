@@ -27,7 +27,10 @@ pcDiffPop <- function(sc.object,
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
-    pval <- min(p.adjust(vals$p, method="holm"))
+    discov <- sum(vals$p < 0.05)
+    pval <- pbinom(discov,size=npcs,prob=0.05,lower.tail=FALSE)
+    #Holm's correction
+    #pval <- min(p.adjust(vals$p, method="holm"))
     #Fisher's test
     #stat <- -2*sum(log(vals$p))
     #pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
