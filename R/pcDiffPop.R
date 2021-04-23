@@ -7,6 +7,7 @@ pcDiffPop <- function(sc.object,
   pca <- sc.object@reductions$pca@cell.embeddings
   npcs <- ncol(pca)
   design <- makeDesign(fixed.effects,random.effects)
+  weights <- sc.object@reductions$pca@stdev
 
   #get data
   meta.cols <- vapply(c(fixed.effects,random.effects),function(x) {
@@ -27,10 +28,9 @@ pcDiffPop <- function(sc.object,
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
-    discov <- sum(vals$p < 0.05)
-    pval <- pbinom(discov,size=npcs,prob=0.05,lower.tail=FALSE)
+    #pval <- metap::sumz(vals$p)$p[1,1]
     #Holm's correction
-    #pval <- min(p.adjust(vals$p, method="holm"))
+    pval <- min(p.adjust(vals$p, method="holm"))
     #Fisher's test
     #stat <- -2*sum(log(vals$p))
     #pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
@@ -39,7 +39,7 @@ pcDiffPop <- function(sc.object,
   }
   res <- data.frame(row.names=res[,1],
                     distance=res[,2],
-                    p.val=p.adjust(res[,3],method="fdr"))
+                    p.val=res[,3])
   out$results <- res
   out$design <- design
   return(out)
