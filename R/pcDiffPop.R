@@ -30,10 +30,10 @@ pcDiffPop <- function(sc.object,
     out$vals[[i]] <- vals
     #pval <- metap::sumz(vals$p)$p[1,1]
     #Holm's correction
-    pval <- min(p.adjust(vals$p, method="holm"))
+    #pval <- min(p.adjust(vals$p, method="holm"))
     #Fisher's test
-    #stat <- -2*sum(log(vals$p))
-    #pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
+    stat <- -2*sum(log(vals$p))
+    pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
     row <- c(i,sqrt(sum(vals$beta^2)),pval)
     res <- rbind(res,row)
   }
