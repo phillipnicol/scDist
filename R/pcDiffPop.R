@@ -13,33 +13,27 @@ pcDiffPop <- function(sc.object,
   meta.cols <- vapply(c(fixed.effects,random.effects),function(x) {
     which(colnames(sc.object@meta.data)==x)
   }, integer(1))
-  print(meta.cols)
   data <- sc.object@meta.data[,meta.cols]
   data$y <- rep(0,nrow(data))
 
-  all_clusters <- unique(clusters)
+  clusters <- as.vector(unlist(sc.object[[clusters]]))
+  all_clusters <- sort(unique(clusters))
+  print(all_clusters)
+  distances <- c()
   res <- matrix(0,nrow=0,ncol=3)
   out <- list()
   out$vals <- list()
   for(i in all_clusters) {
-    print(i)
     ix <- which(clusters==i)
     pca.sub <- pca[ix,]
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
-    #pval <- metap::sumz(vals$p)$p[1,1]
-    #Holm's correction
-    #pval <- min(p.adjust(vals$p, method="holm"))
-    #Fisher's test
-    stat <- -2*sum(log(vals$p))
-    pval <- pchisq(stat,df=2*npcs,lower.tail = FALSE)
-    row <- c(i,sqrt(sum(vals$beta^2)),pval)
-    res <- rbind(res,row)
+    distances <- c(distances, sqrt(sum(vals$beta^2)))
   }
-  res <- data.frame(row.names=res[,1],
-                    distance=res[,2],
-                    p.val=res[,3])
+  res <- data.frame(row.names = all_clusters,
+                    distance = distances,
+                    p.val = unlist(combineP(out$vals, npcs)))
   out$results <- res
   out$design <- design
   return(out)
@@ -60,6 +54,15 @@ pcDiff <- function(pca, data, design) {
   out <- list()
   out$beta <- beta; out$p <- p
   out
+}
+
+combineP <- function(vals, npcs) {
+  #Fisher's method
+  p.val <- lapply(vals, function(x) {
+    stat <- -2*sum(log(x$p))
+    pchisq(stat,df=2*npcs,lower.tail = FALSE)
+  })
+  p.val
 }
 
 makeDesign <- function(fixed.effects, random.effects) {
