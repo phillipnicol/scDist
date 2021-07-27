@@ -59,8 +59,9 @@ pcDiff <- function(pca, data, design) {
 combineP <- function(vals, npcs) {
   #Fisher's method
   p.val <- lapply(vals, function(x) {
-    stat <- -2*sum(log(x$p))
-    pchisq(stat,df=2*npcs,lower.tail = FALSE)
+    max(1,min(npcs*x$p))
+    #stat <- -2*sum(log(x$p))
+    #pchisq(stat,df=2*npcs,lower.tail = FALSE)
   })
   p.val
 }
