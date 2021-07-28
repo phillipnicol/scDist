@@ -23,17 +23,19 @@ pcDiffPop <- function(sc.object,
   res <- matrix(0,nrow=0,ncol=3)
   out <- list()
   out$vals <- list()
+  p <- c()
   for(i in all_clusters) {
     ix <- which(clusters==i)
     pca.sub <- pca[ix,]
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design)
     out$vals[[i]] <- vals
+    p <- c(p, vals$combinep)
     distances <- c(distances, sqrt(sum(vals$beta^2)))
   }
   res <- data.frame(row.names = all_clusters,
                     distance = distances,
-                    p.val = unlist(combineP(out$vals, npcs)))
+                    p.val = p)
   out$results <- res
   out$design <- design
   return(out)
@@ -51,8 +53,10 @@ pcDiff <- function(pca, data, design) {
       p[i] <- sumfit$coefficients[2,5]
     },silent=TRUE)
   }
+  combinep <- EmpiricalBrownsMethod::empiricalBrownsMethod(data_matrix=t(pca),
+                                               p_values=p)
   out <- list()
-  out$beta <- beta; out$p <- p
+  out$beta <- beta; out$p <- p; out$combinep <- combinep
   out
 }
 
