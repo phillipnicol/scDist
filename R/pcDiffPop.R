@@ -1,24 +1,24 @@
 
-
-pcDiffPop <- function(sc.object,
+#' @export
+pcDiffPop <- function(pca,
+                      meta.data,
                       fixed.effects,
                       random.effects,
-                      clusters) {
-  pca <- sc.object@reductions$pca@cell.embeddings
+                      clusters,
+                      shrinkage=FALSE) {
+  # Save relevant info to variables
   npcs <- ncol(pca)
   design <- makeDesign(fixed.effects,random.effects)
-  weights <- sc.object@reductions$pca@stdev
 
-  #get data
+  #get relevant metadata
   meta.cols <- vapply(c(fixed.effects,random.effects),function(x) {
-    which(colnames(sc.object@meta.data)==x)
+    which(colnames(meta.data)==x)
   }, integer(1))
-  data <- sc.object@meta.data[,meta.cols]
+  data <- meta.data[,meta.cols]
   data$y <- rep(0,nrow(data))
 
-  clusters <- as.vector(unlist(sc.object[[clusters]]))
+  clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
-  print(all_clusters)
   distances <- c()
   res <- matrix(0,nrow=0,ncol=3)
   out <- list()
@@ -28,7 +28,7 @@ pcDiffPop <- function(sc.object,
     ix <- which(clusters==i)
     pca.sub <- pca[ix,]
     data.sub <- data[ix,]
-    vals <- pcDiff(pca.sub,data.sub,design)
+    vals <- pcDiff(pca.sub,data.sub,design,shrinkage)
     out$vals[[i]] <- vals
     p <- c(p, vals$combinep)
     distances <- c(distances, sqrt(sum(vals$beta^2)))
@@ -41,7 +41,7 @@ pcDiffPop <- function(sc.object,
   return(out)
 }
 
-pcDiff <- function(pca, data, design) {
+pcDiff <- function(pca, data, design, shrinkage) {
   d <- ncol(pca)
   beta <- rep(0,d); p <- rep(1,d)
   for(i in 1:d) {
@@ -51,23 +51,18 @@ pcDiff <- function(pca, data, design) {
       sumfit <- summary(fit)
       beta[i] <- sumfit$coefficients[2,1]
       p[i] <- sumfit$coefficients[2,5]
-    },silent=TRUE)
+      if(shrinkage) {
+        stderr <- sumfit$coefficients[2,2]
+        beta[i] <- beta[i]/(stderr^2 + 1)
+      }
+    })
   }
+  #Combine p values using empirical browns method
   combinep <- EmpiricalBrownsMethod::empiricalBrownsMethod(data_matrix=t(pca),
                                                p_values=p)
   out <- list()
   out$beta <- beta; out$p <- p; out$combinep <- combinep
   out
-}
-
-combineP <- function(vals, npcs) {
-  #Fisher's method
-  p.val <- lapply(vals, function(x) {
-    min(1,min(npcs*x$p))
-    #stat <- -2*sum(log(x$p))
-    #pchisq(stat,df=2*npcs,lower.tail = FALSE)
-  })
-  p.val
 }
 
 makeDesign <- function(fixed.effects, random.effects) {
