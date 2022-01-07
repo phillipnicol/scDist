@@ -49,46 +49,30 @@ importancePlot <- function(sc.object,
   p
 }
 
-#' @export
-pcDiffPlot <- function(pcdp) {
-  df <- data.frame(ct=rownames(pcdp$results),
-                   dist=pcdp$results$distance,
-                   p=-log10(pcdp$results$p.val))
+pcDiffPlot <- function(pcdp.object) {
+  results <- pcdp.object$results
+  results <- results[order(results$Dist,decreasing=FALSE),]
 
-  df$signif <- ifelse(df$p < 1, "0", "1")
-  df$label <- vapply(1:nrow(df), FUN.VALUE=character(1),
-                     function(i) {
-                       if(df$signif[i]=="1") {
-                         df$ct[i]
-                       }
-                       else {
-                         ""
-                       }
-                     })
+  df <- data.frame(cell_type=rownames(results),
+                   dist=results$Dist,
+                   se_up=results$Dist+results$S.e.,
+                   se_down=ifelse(results$Dist-results$S.e. < 0,
+                                  0,
+                                  results$Dist-results$S.e.))
+  df$cell_type <- factor(df$cell_type,levels=df$cell_type)
 
-  p <- ggplot2::ggplot(df,ggplot2::aes(x=dist,
-                                       y=p,
-                                       color=signif,
-                                       label=label))
-  p <- p+ggplot2::geom_point()
-  p <- p+ggplot2::scale_color_manual(values=c("grey",
-                                              "red"),
-                                     labels=c("FDR > 0.1",
-                                              "FDR < 0.1"))
-  p <- p+ggplot2::geom_text(nudge_x = -0.5,
-                            nudge_y=0.25,
-                            show.legend = FALSE)
-  p <- p+ggplot2::geom_hline(yintercept=1,
-                             linetype="dashed",
-                             color="blue")
-  p <- p+labs(x="Inter-group deviation",
-              y="-log10 p.val",
-              color="")
-  p <- p+ggplot2::xlab("Inter-group deviation")
-  p <- p+ggplot2::ylab("-log10 p.val")
-  p <- p+ggplot2::theme_classic()
+  p <- ggplot(data=df,aes(x=cell_type,y=dist))
+  p <- p + geom_errorbar(aes(ymin=se_down,ymax=se_up))
+  p <- p + geom_point(color="red")
+  p <- p + xlab("Cell type")+ylab("Dist.")
+  p <- p + theme_linedraw()
   p
+
 }
+
+
+
+
 
 #' @export
 plotBetas <- function(pcdp, cluster) {
