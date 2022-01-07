@@ -10,7 +10,7 @@ License: What license is it under?
 Imports:
 	lmerTest,
 	Seurat,
-	EmpiricalBrownsMethod,
+	irlba,
 	ggplot2,
 	ggpubr,
 	data.table
