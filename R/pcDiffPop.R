@@ -5,7 +5,8 @@ pcDiffPop <- function(normalized_counts,
                       fixed.effects,
                       random.effects=c(),
                       clusters,
-                      d=50) {
+                      d=50,
+                      truncate=FALSE) {
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)
   print(design)
@@ -39,7 +40,7 @@ pcDiffPop <- function(normalized_counts,
     #pca.sub <- prcomp(normalized_counts.sub)
     pca.sub <- irlba::prcomp_irlba(x=normalized_counts.sub,n=d)
     data.sub <- data[ix,]
-    vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE)
+    vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
     out$vals[[i]] <- vals
     res <- rbind(res,c(vals$D.hat,
@@ -62,7 +63,13 @@ pcDiffPop <- function(normalized_counts,
   return(out)
 }
 
-pcDiff <- function(pca, data, design, design.null, d, RE) {
+pcDiff <- function(pca,
+                   data,
+                   design,
+                   design.null,
+                   d,
+                   RE,
+                   truncate) {
   beta <- rep(0,d)
   beta_sd <- rep(0,d)
   dfs <- rep(0,d)
@@ -112,7 +119,9 @@ pcDiff <- function(pca, data, design, design.null, d, RE) {
 
   #Estimate D
   D.hat <- sum(beta^2-beta_sd^2)
-  D.hat <- max(D.hat,0)
+  if(truncate) {
+    D.hat <- max(D.hat,0)
+  }
 
   #Estimate standard error
   #D.se <- sqrt(sum(3*beta_sd^4))
