@@ -53,4 +53,29 @@ plotBetas <- function(pcdp, cluster) {
   p
 }
 
+#' @export
+pcDiffPlot2 <- function(pcdp) {
+  p.value <- p.adjust(pcdp$results$p.F,method="fdr")
+  dist <- pcdp$results$Dist.
+
+  df <- data.frame(x=dist,y=-log10(p.value))
+  df$color <- ifelse(df$y > 1, "orange", "grey")
+  df$label <- rownames(out$results)
+
+  p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
+  p <- p+scale_color_manual(values=c("grey","orange"))
+  p <- p + geom_point()
+  p <- p + geom_text_repel(max.overlaps=Inf)
+  p <- p + geom_hline(yintercept=1,color="blue",
+                      linetype="dashed")
+  p <- p + theme_linedraw()
+  p <- p + xlab("Estimated distance")
+  p <- p + ylab("-log10 FDR")
+  p <- p + guides(color="none",alpha="none")
+  p
+
+  out <- list()
+  out$plot <- p
+  out
+}
 

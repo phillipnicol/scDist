@@ -160,6 +160,7 @@ pcDiff <- function(pca,
   out
 }
 
+
 makeDesign <- function(fixed.effects, random.effects) {
   design <- "y~"
   for(i in fixed.effects) {
