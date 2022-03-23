@@ -177,5 +177,8 @@ makeDesign <- function(fixed.effects, random.effects) {
       design <- paste0(design,"(1|",i,")")
     }
   }
+  if(sum(c(length(fixed.effects),length(random.effects)))==0) {
+    design <- "y~1"
+  }
   as.formula(design)
 }
