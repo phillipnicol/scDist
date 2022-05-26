@@ -29,7 +29,7 @@ pcDiffPop <- function(normalized_counts,
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
   distances <- c()
-  res <- matrix(0,nrow=0,ncol=6)
+  res <- matrix(0,nrow=0,ncol=5)
   out <- list()
   out$vals <- list()
   p <- c()
@@ -46,18 +46,16 @@ pcDiffPop <- function(normalized_counts,
     res <- rbind(res,c(vals$D.hat,
                        vals$D.se,
                        vals$W,
-                       vals$LRT.p,
-                       vals$F.p,
-                       sum(vals$BioVar)/sum(vals$lambda^2)))
+                       vals$p.sum,
+                       vals$p.max))
   }
   res <- as.data.frame(res)
   rownames(res) <- all_clusters
   colnames(res) <- c("Dist.",
                      "S.e.",
                      "Stat.",
-                     "p.LRT",
-                     "p.F",
-                     "BioVar")
+                     "p.sum",
+                     "p.max")
   out$results <- res
   out$design <- design
   return(out)
@@ -73,11 +71,6 @@ pcDiff <- function(pca,
   beta <- rep(0,d)
   beta_sd <- rep(0,d)
   dfs <- rep(0,d)
-  likelihood_full <- 0
-  likelihood_null <- 0
-  BioVar <- rep(0,d)
-  CI_lb <- rep(0,d)
-  CI_ub <- rep(0,d)
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
@@ -85,22 +78,6 @@ pcDiff <- function(pca,
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]
-
-      X <- model.matrix(fit)
-
-      a <- fit@beta[1]
-      b <- fit@beta[2]
-
-      numerator <- a + X[,2]*b
-      numerator <- var(numerator)
-      denominator <- numerator+fit@theta^2+fit@sigma^2
-      R2 <- numerator/denominator
-      BioVar[i] <- R2*pca$sdev[i]^2
-
-      fit.full <- lmer(formula=design,data=data,REML=FALSE)
-      fit.null <- lmer(formula=design.null,data=data,REML=FALSE)
-      likelihood_full <- likelihood_full+logLik(fit.full)
-      likelihood_null <- likelihood_null+logLik(fit.null)
 
     } else {
       fit <- lm(formula=design,data=data)
@@ -111,11 +88,6 @@ pcDiff <- function(pca,
     beta_sd[i] <- sumfit$coefficients[2,2]
   }
 
-  LRT = -2*(likelihood_null-likelihood_full)
-
-  #CI
-  CI_total_lb <- sum(CI_lb^2)
-  CI_total_ub <- sum(CI_ub^2)
 
   #Estimate D
   D.hat <- sum(beta^2-beta_sd^2)
@@ -124,39 +96,38 @@ pcDiff <- function(pca,
   }
 
   #Estimate standard error
-  #D.se <- sqrt(sum(3*beta_sd^4))
-  B2 <- ifelse(beta^2 - beta_sd^2 < 0, 0, beta^2-beta_sd^2)
-  D.se <- sqrt(sum(4*B2*beta_sd^2))
-
-  CI_total_lb <- qnorm(0.025,mean=D.hat,sd=D.se)
-  CI_total_ub <- qnorm(0.975,mean=D.hat,sd=D.se)
+  beta2.var <- 4*(beta^2-beta_sd^2)*beta_sd^2+2*beta_sd^2
+  D.se <- sum(beta2.var)
+  D.se <- ifelse(D.se < 0, 0, sqrt(D.se))
 
   #Wald stat
   W <- sum((beta/beta_sd)^2)
+  W.max <- max((beta/beta_sd)^2)
 
   #Monte carlo p-value
-  mcreps <- 10^4
+  mcreps <- 10^5
+  mymax <- rep(0,mcreps)
   mysum <- rep(0,mcreps)
   for(i in 1:d) {
     myf <- rf(mcreps,df1=1,df2=dfs[i])
     mysum <- mysum+myf
+    mymax <- ifelse(myf > mymax,myf,mymax)
   }
-  p <- (sum(mysum > W)+1)/(mcreps+1)
+  p.sum <- (sum(mysum > W)+1)/(mcreps+1)
+  p.max <- (sum(mymax > W.max)+1)/(mcreps+1)
 
   out <- list()
   out$D.hat <- D.hat
   out$D.se <- D.se
   out$W <- W
-  out$LRT.p <- pchisq(LRT,df=d,lower.tail=FALSE)
   out$beta <- beta
   out$beta_sd <- beta_sd
   out$lambda <- pca$sdev[1:d]
   out$scores <- pca$x[,1:d]
   out$data <- data
   out$dfs <- dfs
-  out$CI <- c(CI_total_lb, CI_total_ub)
-  out$F.p <- p
-  out$BioVar <- BioVar
+  out$p.sum <- p.sum
+  out$p.max <- p.max
   out
 }
 

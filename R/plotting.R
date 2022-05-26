@@ -55,12 +55,15 @@ plotBetas <- function(pcdp, cluster) {
 
 #' @export
 pcDiffPlot2 <- function(pcdp) {
-  p.value <- p.adjust(pcdp$results$p.F,method="fdr")
-  dist <- pcdp$results$Dist.
+  p.value <- p.adjust(pcdp$results$p.LRT,method="fdr")
+  dist <- ifelse(pcdp$results$Dist.>0,
+                 pcdp$results$Dist.,
+                 0)
+  dist <- sqrt(dist)
 
   df <- data.frame(x=dist,y=-log10(p.value))
   df$color <- ifelse(df$y > 1, "orange", "grey")
-  df$label <- rownames(out$results)
+  df$label <- rownames(pcdp$results)
 
   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
   p <- p+scale_color_manual(values=c("grey","orange"))
