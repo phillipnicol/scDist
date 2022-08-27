@@ -15,7 +15,7 @@ featureImportance <- function(expr,
     data.sub$y <- expr[i,]
     fit <- lmer(formula=pcdp$design,
                 data=data.sub)
-    fit@beta[1]
+    fit@beta[2]
   })
 
   loadings <- pcdp$vals[[cluster]]$loadings[,component]

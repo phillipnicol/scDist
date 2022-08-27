@@ -5,13 +5,15 @@ pcDiffPop <- function(normalized_counts,
                       fixed.effects,
                       random.effects=c(),
                       clusters,
-                      d=50,
-                      truncate=FALSE) {
+                      d=20,
+                      truncate=FALSE,
+                      min.counts.per.cell=20) {
+  #Normalized counts currently in cells x genes
+  normalized_counts <- t(normalized_counts)
+
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)
-  print(design)
   design.null <- makeDesign(fixed.effects[-1],random.effects)
-  print(design.null)
 
   RE <- TRUE
   if(length(random.effects)==0) {
@@ -33,11 +35,17 @@ pcDiffPop <- function(normalized_counts,
   out <- list()
   out$vals <- list()
   p <- c()
+  bar <- txtProgressBar(min=0,max=length(all_clusters),initial = 0)
+  cntr <- 1
   for(i in all_clusters) {
-    print(i)
+    setTxtProgressBar(bar,cntr)
+    cntr <- cntr+1
     ix <- which(clusters==i)
     normalized_counts.sub <- normalized_counts[ix,]
     #pca.sub <- prcomp(normalized_counts.sub)
+    if(length(ix) < min.counts.per.cell) {
+      next
+    }
     pca.sub <- irlba::prcomp_irlba(x=normalized_counts.sub,n=d)
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
@@ -58,6 +66,8 @@ pcDiffPop <- function(normalized_counts,
                      "p.max")
   out$results <- res
   out$design <- design
+
+  close(bar)
   return(out)
 }
 
@@ -74,7 +84,8 @@ pcDiff <- function(pca,
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
-      fit <- lmer(formula=design,data=data,REML=TRUE)
+      fit <- lmer(formula=design,data=data,REML=TRUE,
+                  control = lmerControl(check.conv.singular="ignore"))
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]

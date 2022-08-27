@@ -16,8 +16,9 @@ pcDiffPlot <- function(pcdp.object) {
   p <- p + geom_point(color="red")
   p <- p + xlab("Cell type")+ylab("Dist.")
   p <- p + theme_linedraw()
+  p <- p + coord_flip()
   p
-
+  return(p)
 }
 
 
@@ -28,7 +29,7 @@ pcDiffPlot <- function(pcdp.object) {
 plotBetas <- function(pcdp, cluster) {
   ix <- which(names(pcdp$vals) == cluster)
   df <- data.frame(beta=pcdp$vals[[ix]]$beta,
-                   p=pcdp$vals[[ix]]$F.p)
+                   p=pcdp$vals[[ix]]$p.sum)
   df$dim <- c(1:length(df$p))
   df$signif <- apply(df,1,function(x) {
     if(x["p"] < 0.001/nrow(df)) {
@@ -45,17 +46,18 @@ plotBetas <- function(pcdp, cluster) {
   p <- ggplot2::ggplot(df,ggplot2::aes(x=dim,y=beta))
   p <- p + geom_segment(ggplot2::aes(x=dim,xend=dim,y=0,yend=beta))
   p <- p + ggplot2::geom_point(size=2,color="purple")
-  df$beta <- ifelse(df$beta > 0, df$beta+0.35, df$beta-0.35)
-  p <- p + ggplot2::geom_text(data=df, ggplot2::aes(label=signif,x=dim,y=beta))
-  p <- p + ggplot2::labs(x="PC Dimension", y=expression(beta[k]))
+  #df$beta <- ifelse(df$beta > 0, df$beta+0.35, df$beta-0.35)
+  #p <- p + ggplot2::geom_text(data=df, ggplot2::aes(label=signif,x=dim,y=beta))
+  p <- p + ggplot2::labs(x="PC Dimension", y=expression(U*beta[k]))
   p <- p + ggplot2::ggtitle(label=cluster)
   p <- p + ggplot2::theme_linedraw()
   p
+  return(p)
 }
 
 #' @export
 pcDiffPlot2 <- function(pcdp) {
-  p.value <- p.adjust(pcdp$results$p.LRT,method="fdr")
+  p.value <- p.adjust(pcdp$results$p.sum,method="fdr")
   dist <- ifelse(pcdp$results$Dist.>0,
                  pcdp$results$Dist.,
                  0)
