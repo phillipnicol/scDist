@@ -1,4 +1,6 @@
 
+#' @export
+#'
 #' @title pcDiffPop: Identify perturbed cell types in
 #' single-cell RNA-seq data
 #'
