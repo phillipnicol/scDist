@@ -65,6 +65,7 @@ pcDiffPop <- function(normalized_counts,
   out <- list()
   out$vals <- list()
   p <- c()
+  print(length(all_clusters))
   bar <- txtProgressBar(min=0,max=length(all_clusters),initial = 0)
   cntr <- 1
   for(i in all_clusters) {
