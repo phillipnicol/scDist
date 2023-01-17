@@ -1,7 +1,7 @@
 
 #' @export
 #'
-#' @title pcDiffPop: Identify perturbed cell types in
+#' @title scDist: Identify perturbed cell types in
 #' single-cell RNA-seq data
 #'
 #' @description Estimate the distance between
@@ -30,7 +30,7 @@
 #' }
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
-pcDiffPop <- function(normalized_counts,
+scDist <- function(normalized_counts,
                       meta.data,
                       fixed.effects,
                       random.effects=c(),

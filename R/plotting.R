@@ -1,6 +1,19 @@
 #' @export
-pcDiffPlot <- function(pcdp.object) {
-  results <- pcdp.object$results
+#'
+#' @title Plot the results of scDist
+#'
+#' @description Plot the distance estimates and corresponding standard
+#' errors
+#'
+#' @param scd.object A list obtained from applying the main function scDist.
+#' @param return.plot If true, return the ggplot object
+#'
+#' @return If return.plot is true, a gglot object is retured. Otherwise,
+#' nothing is returned.
+#'
+#' @author Phillip B. Nicol <philnicol740@gmail.com>
+DistPlot <- function(scd.object, return.plot=FALSE) {
+  results <- scd.object$results
   results <- results[order(results$Dist,decreasing=FALSE),]
 
   df <- data.frame(cell_type=rownames(results),
@@ -18,7 +31,9 @@ pcDiffPlot <- function(pcdp.object) {
   p <- p + theme_linedraw()
   p <- p + coord_flip()
   p
-  return(p)
+  if(return.plot) {
+    return(p)
+  }
 }
 
 
@@ -26,10 +41,10 @@ pcDiffPlot <- function(pcdp.object) {
 
 
 #' @export
-plotBetas <- function(pcdp, cluster) {
-  ix <- which(names(pcdp$vals) == cluster)
-  df <- data.frame(beta=pcdp$vals[[ix]]$beta,
-                   p=pcdp$vals[[ix]]$p.sum)
+plotBetas <- function(scd.object, cluster) {
+  ix <- which(names(scd.object$vals) == cluster)
+  df <- data.frame(beta=scd.object$vals[[ix]]$beta,
+                   p=scd.object$vals[[ix]]$p.sum)
   df$dim <- c(1:length(df$p))
   df$signif <- apply(df,1,function(x) {
     if(x["p"] < 0.001/nrow(df)) {
