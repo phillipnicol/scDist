@@ -69,18 +69,3 @@ FullSimulate <- function(nn,
   }
   results
 }
-
-J <- c(10,100,10^3,10^4)
-reps <- 2
-res.scDist <- matrix(0,nrow=length(J),ncol=reps)
-res.augur <- res.scDist
-for(j in 1:length(J)) {
-  for(k in 1:reps) {
-    res <- FullSimulate(nn=100,dist_true=10,tau=0.5,N1=5,N2=5,G=1000,J=J[j],augur=FALSE)
-    res.scDist[j,k] <- res$scDist_time
-    res.augur[j,k] <- 0
-  }
-}
-
-saveRDS(res.scDist, "scDist_time.RDS")
-saveRDS(res.augur,"augur_time.RDS")
