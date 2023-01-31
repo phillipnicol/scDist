@@ -61,7 +61,7 @@ scDist <- function(normalized_counts,
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
   distances <- c()
-  res <- matrix(0,nrow=0,ncol=5)
+  res <- matrix(0,nrow=0,ncol=8)
   out <- list()
   out$vals <- list()
   p <- c()
@@ -86,7 +86,10 @@ scDist <- function(normalized_counts,
                        vals$D.se,
                        vals$W,
                        vals$p.sum,
-                       vals$p.max))
+                       vals$p.max,
+                       vals$D.post.med,
+                       vals$D.post.lb,
+                       vals$D.post.ub))
   }
   res <- as.data.frame(res)
   rownames(res) <- all_clusters
@@ -94,7 +97,10 @@ scDist <- function(normalized_counts,
                      "S.e.",
                      "Stat.",
                      "p.sum",
-                     "p.max")
+                     "p.max",
+                     "D.post.med",
+                     "D.post.lb",
+                     "D.post.ub")
   out$results <- res
   out$design <- design
 
@@ -130,6 +136,14 @@ pcDiff <- function(pca,
     beta_sd[i] <- sumfit$coefficients[2,2]
   }
 
+  beta.ash <- ash(betahat=beta,sebetahat = beta_sd)
+  beta.post <- get_post_sample(beta.ash,10^4)
+  D.post <- apply(beta.post,1,function(b) {
+    sqrt(sum(b^2))
+  })
+  D.post.med <- median(D.post)
+  D.post.lb <- quantile(D.post, 0.025)
+  D.post.ub <- quantile(D.post,0.975)
 
   #Estimate D
   D.hat <- sum(beta^2-beta_sd^2)
@@ -170,6 +184,9 @@ pcDiff <- function(pca,
   out$dfs <- dfs
   out$p.sum <- p.sum
   out$p.max <- p.max
+  out$D.post.med <- D.post.med
+  out$D.post.lb <- D.post.lb
+  out$D.post.ub <- D.post.ub
   out
 }
 
