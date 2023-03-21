@@ -37,6 +37,28 @@ DistPlot <- function(scd.object, return.plot=FALSE) {
 }
 
 
+DistPlot2 <- function(scd.object, return.plot=FALSE) {
+  results <- scd.object$results
+  results <- results[order(results$Dist,decreasing=FALSE),]
+
+  df <- data.frame(cell_type=rownames(results),
+                   dist=results$Dist,
+                   se_up=results$D.post.ub,
+                   se_down=results$D.post.lb)
+  df$cell_type <- factor(df$cell_type,levels=df$cell_type)
+
+  p <- ggplot(data=df,aes(x=cell_type,y=dist))
+  p <- p + geom_errorbar(aes(ymin=se_down,ymax=se_up))
+  p <- p + geom_point(color="red")
+  p <- p + xlab("Cell type")+ylab("Dist.")
+  p <- p + theme_linedraw()
+  p <- p + coord_flip()
+  p
+  if(return.plot) {
+    return(p)
+  }
+}
+
 
 
 
@@ -70,32 +92,29 @@ plotBetas <- function(scd.object, cluster) {
   return(p)
 }
 
-#'
-#' pcDiffPlot2 <- function(pcdp) {
-#'   p.value <- p.adjust(pcdp$results$p.sum,method="fdr")
-#'   dist <- ifelse(pcdp$results$Dist.>0,
-#'                  pcdp$results$Dist.,
-#'                  0)
-#'   dist <- sqrt(dist)
-#'
-#'   df <- data.frame(x=dist,y=-log10(p.value))
-#'   df$color <- ifelse(df$y > 1, "orange", "grey")
-#'   df$label <- rownames(pcdp$results)
-#'
-#'   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
-#'   p <- p+scale_color_manual(values=c("grey","orange"))
-#'   p <- p + geom_point()
-#'   p <- p + geom_text_repel(max.overlaps=Inf)
-#'   p <- p + geom_hline(yintercept=1,color="blue",
-#'                       linetype="dashed")
-#'   p <- p + theme_linedraw()
-#'   p <- p + xlab("Estimated distance")
-#'   p <- p + ylab("-log10 FDR")
-#'   p <- p + guides(color="none",alpha="none")
-#'   p
-#'
-#'   out <- list()
-#'   out$plot <- p
-#'   out
-#' }
-#'
+
+scDistPlot3 <- function(pcdp) {
+   p.value <- p.adjust(pcdp$results$p.sum,method="fdr")
+   dist <- pcdp$results$Dist.
+
+   df <- data.frame(x=dist,y=-log10(p.value))
+   df$color <- ifelse(df$y > 1, "orange", "grey")
+   df$label <- rownames(pcdp$results)
+
+   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
+   p <- p+scale_color_manual(values=c("grey","orange"))
+   p <- p + geom_point()
+   p <- p + geom_text_repel(max.overlaps=Inf)
+   p <- p + geom_hline(yintercept=1,color="blue",
+                       linetype="dashed")
+   p <- p + theme_linedraw()
+   p <- p + xlab("Estimated distance")
+   p <- p + ylab("-log10 FDR")
+   p <- p + guides(color="none",alpha="none")
+   p
+
+   out <- list()
+   out$plot <- p
+   out
+ }
+
