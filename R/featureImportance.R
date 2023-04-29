@@ -1,24 +1,24 @@
 
-
+#' @export
 featureImportance <- function(expr,
                               meta.data,
-                              pcdp,
+                              scd,
                               cluster,
                               component) {
 
   ixs <- which(meta.data$cell_type == cluster)
   expr <- expr[,ixs]
   expr_diff <- rep(0, nrow(expr))
-  data.sub <- pcdp$vals[[cluster]]$data
+  data.sub <- scd$vals[[cluster]]$data
   expr_diff <- vapply(1:nrow(expr),FUN.VALUE=numeric(1),function(i) {
     print(i)
     data.sub$y <- expr[i,]
-    fit <- lmer(formula=pcdp$design,
+    fit <- lmerTest::lmer(formula=scd$design,
                 data=data.sub)
     fit@beta[2]
   })
 
-  loadings <- pcdp$vals[[cluster]]$loadings[,component]
+  loadings <- scd$vals[[cluster]]$loadings[,component]
   FI <- abs(loadings)*expr_diff
   names(FI) <- rownames(expr)
 
@@ -33,7 +33,7 @@ featureImportance <- function(expr,
                      label=label))
   p <- p+scale_color_manual(values=c("grey","red"))
   p <- p + geom_point()
-  p <- p + geom_text_repel(max.overlaps=Inf)
+  p <- p + ggrepel::geom_text_repel(max.overlaps=Inf)
   p <- p + geom_hline(yintercept=0,color="blue",
                       linetype="dashed")
   p <- p + geom_vline(xintercept=0,color="blue",

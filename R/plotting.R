@@ -1,3 +1,6 @@
+#' @import ggplot2
+NULL
+
 #' @export
 #'
 #' @title Plot the results of scDist
@@ -14,14 +17,12 @@
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 DistPlot <- function(scd.object, return.plot=FALSE) {
   results <- scd.object$results
-  results <- results[order(results$Dist,decreasing=FALSE),]
+  results <- results[order(results$Dist.,decreasing=FALSE),]
 
   df <- data.frame(cell_type=rownames(results),
-                   dist=results$Dist,
-                   se_up=results$Dist+results$S.e.,
-                   se_down=ifelse(results$Dist-results$S.e. < 0,
-                                  0,
-                                  results$Dist-results$S.e.))
+                   dist=results$Dist.,
+                   se_up=results$`95% CI (upper)`,
+                   se_down=results$`95% CI (low)`)
   df$cell_type <- factor(df$cell_type,levels=df$cell_type)
 
   p <- ggplot(data=df,aes(x=cell_type,y=dist))
@@ -30,35 +31,39 @@ DistPlot <- function(scd.object, return.plot=FALSE) {
   p <- p + xlab("Cell type")+ylab("Dist.")
   p <- p + theme_linedraw()
   p <- p + coord_flip()
-  p
+  print(p)
+
   if(return.plot) {
     return(p)
   }
 }
 
 
-DistPlot2 <- function(scd.object, return.plot=FALSE) {
-  results <- scd.object$results
-  results <- results[order(results$Dist,decreasing=FALSE),]
+#' @export
+FDRDistPlot <- function(scd.object) {
+  p.value <- p.adjust(scd.object$results$p.val,method="fdr")
+  dist <- scd.object$results$Dist.
 
-  df <- data.frame(cell_type=rownames(results),
-                   dist=results$Dist,
-                   se_up=results$D.post.ub,
-                   se_down=results$D.post.lb)
-  df$cell_type <- factor(df$cell_type,levels=df$cell_type)
+  df <- data.frame(x=dist,y=-log10(p.value))
+  df$color <- ifelse(df$y > 1, "orange", "grey")
+  df$label <- rownames(scd.object$results)
 
-  p <- ggplot(data=df,aes(x=cell_type,y=dist))
-  p <- p + geom_errorbar(aes(ymin=se_down,ymax=se_up))
-  p <- p + geom_point(color="red")
-  p <- p + xlab("Cell type")+ylab("Dist.")
+  p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
+  p <- p+scale_color_manual(values=c("grey","orange"))
+  p <- p + geom_point()
+  p <- p + ggrepel::geom_text_repel(max.overlaps=Inf)
+  p <- p + geom_hline(yintercept=1,color="blue",
+                      linetype="dashed")
   p <- p + theme_linedraw()
-  p <- p + coord_flip()
-  p
-  if(return.plot) {
-    return(p)
-  }
-}
+  p <- p + xlab("Estimated distance")
+  p <- p + ylab("-log10 FDR")
+  p <- p + guides(color="none",alpha="none")
+  print(p)
 
+  out <- list()
+  out$plot <- p
+  out
+}
 
 
 
@@ -91,30 +96,3 @@ plotBetas <- function(scd.object, cluster) {
   p
   return(p)
 }
-
-
-scDistPlot3 <- function(pcdp) {
-   p.value <- p.adjust(pcdp$results$p.sum,method="fdr")
-   dist <- pcdp$results$Dist.
-
-   df <- data.frame(x=dist,y=-log10(p.value))
-   df$color <- ifelse(df$y > 1, "orange", "grey")
-   df$label <- rownames(pcdp$results)
-
-   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
-   p <- p+scale_color_manual(values=c("grey","orange"))
-   p <- p + geom_point()
-   p <- p + geom_text_repel(max.overlaps=Inf)
-   p <- p + geom_hline(yintercept=1,color="blue",
-                       linetype="dashed")
-   p <- p + theme_linedraw()
-   p <- p + xlab("Estimated distance")
-   p <- p + ylab("-log10 FDR")
-   p <- p + guides(color="none",alpha="none")
-   p
-
-   out <- list()
-   out$plot <- p
-   out
- }
-

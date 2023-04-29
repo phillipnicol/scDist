@@ -55,17 +55,15 @@ scDist <- function(normalized_counts,
     which(colnames(meta.data)==x)
   }, integer(1))
   data <- meta.data[,meta.cols, drop=FALSE]
-  print(head(data))
   data$y <- rep(0,nrow(data))
 
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
   distances <- c()
-  res <- matrix(0,nrow=0,ncol=8)
+  res <- matrix(0,nrow=0,ncol=4)
   out <- list()
   out$vals <- list()
   p <- c()
-  print(length(all_clusters))
   bar <- txtProgressBar(min=0,max=length(all_clusters),initial = 0)
   cntr <- 1
   for(i in all_clusters) {
@@ -82,25 +80,17 @@ scDist <- function(normalized_counts,
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
     out$vals[[i]] <- vals
-    res <- rbind(res,c(vals$D.hat,
-                       vals$D.se,
-                       vals$W,
-                       vals$p.sum,
-                       vals$p.max,
-                       vals$D.post.med,
+    res <- rbind(res,c(vals$D.post.med,
                        vals$D.post.lb,
-                       vals$D.post.ub))
+                       vals$D.post.ub,
+                       vals$p.sum))
   }
   res <- as.data.frame(res)
   rownames(res) <- all_clusters
   colnames(res) <- c("Dist.",
-                     "S.e.",
-                     "Stat.",
-                     "p.sum",
-                     "p.max",
-                     "D.post.med",
-                     "D.post.lb",
-                     "D.post.ub")
+                     "95% CI (low)",
+                     "95% CI (upper)",
+                     "p.val")
   out$results <- res
   out$design <- design
 
@@ -121,7 +111,7 @@ pcDiff <- function(pca,
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
-      fit <- lmer(formula=design,data=data,REML=TRUE,
+      fit <- lmerTest::lmer(formula=design,data=data,REML=TRUE,
                   control = lmerControl(check.conv.singular="ignore"))
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
@@ -136,8 +126,8 @@ pcDiff <- function(pca,
     beta_sd[i] <- sumfit$coefficients[2,2]
   }
 
-  beta.ash <- ash(betahat=beta,sebetahat = beta_sd)
-  beta.post <- get_post_sample(beta.ash,10^4)
+  beta.ash <- ashr::ash(betahat=beta,sebetahat = beta_sd)
+  beta.post <- ashr::get_post_sample(beta.ash,10^4)
   D.post <- apply(beta.post,1,function(b) {
     sqrt(sum(b^2))
   })

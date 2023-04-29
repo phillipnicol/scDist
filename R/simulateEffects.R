@@ -1,13 +1,13 @@
-
-FullSimulate <- function(nn,
-                         dist_true,
-                         tau,
-                         N1,
-                         N2,
-                         d=20,
-                         G,
-                         J,
-                         augur=FALSE) {
+#' @export
+sim_scDist <- function(nn,
+                      dist_true,
+                      tau,
+                      N1,
+                      N2,
+                      d=20,
+                      G,
+                      J,
+                      augur=FALSE) {
 
 
   beta_true <- rep(0,G)
@@ -50,7 +50,7 @@ FullSimulate <- function(nn,
   }
   meta.data <- data.frame(response=response,samples=as.factor(samples),clusters="A")
   start <- Sys.time()
-  out <- pcDiffPop(y,meta.data,fixed.effects=c("response"),
+  out <- scDist(t(y),meta.data,fixed.effects=c("response"),
                    random.effects=c("samples"),
                    clusters="clusters",
                    d=d)
@@ -60,7 +60,7 @@ FullSimulate <- function(nn,
   results$dist <- out$results$Dist.
   results$p <- out$results$p.F
   results$beta_true <- beta_true
-  results$pcdp_obj <- out
+  results$scDist_obj <- out
   results$scDist_time <- end-start
   if(augur) {
     results$augur <- auc
