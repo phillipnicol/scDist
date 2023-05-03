@@ -112,7 +112,7 @@ pcDiff <- function(pca,
     data$y <- pca$x[,i]
     if(RE) {
       fit <- lmerTest::lmer(formula=design,data=data,REML=TRUE,
-                  control = lmerControl(check.conv.singular="ignore"))
+                  control = lme4::lmerControl(check.conv.singular="ignore"))
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]
