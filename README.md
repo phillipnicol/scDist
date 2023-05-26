@@ -1,13 +1,27 @@
 scDist: Robust identification of perturbed cell types in single-cell
 RNA-seq data
 ================
-R package version 0.1.0
+R package version 1.0.0
+
+## System Requirements
+
+`R` is required to use `scDist`. In development, `R` version 4.0.0 and
+greater were used, but there may be compatibility with previous
+versions.
 
 ## Installation
 
 From the R console, `devtools::install_github("phillipnicol/scDist")`.
+Installation should take less than a minute on a standard machine.
 
 ## Demo
+
+The input to `scDist` is a normalized count matrix and correpsonding
+metadata that describes what condition and patient each cell belongs to.
+In this demo, we create a simulated dataset with 10 cell types. The demo
+should take less than a minute to run on a standard machine. The code is
+also modifiable to see how `scDist` performs for different parameter
+values.
 
 ``` r
 library(scDist)
@@ -135,3 +149,11 @@ DistPlot(out)
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+
+## Reference
+
+If you use `scDist` in your work, please cite:
+
+Nicol, P.B., Paulson, D., Qian, G., Liu, X.S., Irizarry, R.A., and Sahu,
+A.D. (2023). Robust identification of perturbed cell types in
+single-cell RNA-seq data. bioRxiv.

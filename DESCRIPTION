@@ -1,7 +1,8 @@
 Package: scDist
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
+Title: Robust Identification of Perturbed Cell Types in Single-cell RNA-seq 
+Version: 1.0.0
+Date: 2023-05-26
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
