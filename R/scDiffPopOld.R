@@ -5,6 +5,8 @@ makeCellTree <- function(sco) {
   TreeMat <- matrix(1, nrow = length(cell_types), ncol = 1)
   counter <- 1
 
+  my.dist <- matrix(0,nrow=0,ncol=2)
+
   while(length(unique(group)) != length(cell_types)) {
     #Get group with most clusters
     ixs <- which(group == Mode(group))
@@ -12,17 +14,30 @@ makeCellTree <- function(sco) {
     cat("Current group: ", cell_types[ixs], "\n")
     split <- splitGroup(sco[,sco$cellType %in% cell_types[ixs]], cell_types[ixs])
 
-    scd.meta$cluster.new <- scd.meta$cluster
-    for(j in 1:nrow(sco@meta.data)) {
-      scd.meta$cluster.new[j] <- which(scd.meta$cluster[j] == cell_types[ixs])
-    }
+    cluster.new <- vapply(sco$cellType, FUN.VALUE = numeric(1), function(ct) {
+      ix <- which(ct == cell_types)
+      group[ix]
+    })
 
-    if(length(unique(cell_types[ixs])) > 0) {
-      out <- scDist(fixed.effects="response",
-                    random.effects="patient",
-                    cluster="cluster.new")
-      print(out$results)
-    }
+    sco$cluster.new <- cluster.new
+
+    ##out <- scDist(sco@assays$SCT@scale.data,
+    #              meta.data=sco@meta.data,
+    #              fixed.effects="Status",
+    #              random.effects="Donor",
+    #              cluster="cluster.new")
+
+    #for(j in 1:nrow(out$results)) {
+    #  if(rownames(out$results)[j] %in% my.dist[,1]) {
+    #    next
+    #  } else {
+    #    new.row <- c(rownames(out$results)[j], out$results$Dist.[j])
+    #    my.dist <- rbind(my.dist, new.row)
+    #  }
+    #}
+
+    #print(out$results)
+
 
     if(length(unique(split)) > 1) {
       counter <- counter + 1
@@ -35,9 +50,10 @@ makeCellTree <- function(sco) {
       TreeMat <- cbind(TreeMat, group)
     }
     else {
+      print("WARNING ")
       for(j in ixs) {
-        counter <- counter + 1
         group[j] <- counter
+        counter <- counter + 1
         TreeMat <- cbind(TreeMat, group)
       }
     }
@@ -71,7 +87,11 @@ makeCellTree <- function(sco) {
   colnames(Tree) <- c("Child", "Parent")
   rownames(Tree) <- c(1:nrow(Tree))
 
-  return(Tree)
+  out <- list()
+  out$Tree <- Tree
+  out$dist <- my.dist
+
+  return(out)
 }
 
 splitGroup <- function(sco_sub, ixs) {
