@@ -56,6 +56,4 @@ DESCRIPTION
 }
 \author{
 Phillip B. Nicol <philnicol740@gmail.com>
-
-Phillip B. Nicol <philnicol740@gmail.com>
 }
