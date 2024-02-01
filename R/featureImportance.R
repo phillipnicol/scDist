@@ -8,15 +8,18 @@ featureImportance <- function(expr,
 
   ixs <- which(meta.data$cell_type == cluster)
   expr <- expr[,ixs]
-  expr_diff <- rep(0, nrow(expr))
+  #expr_diff <- rep(0, nrow(expr))
   data.sub <- scd$vals[[cluster]]$data
-  expr_diff <- vapply(1:nrow(expr),FUN.VALUE=numeric(1),function(i) {
+  diffexpr <- vapply(1:nrow(expr),FUN.VALUE=numeric(2),function(i) {
     print(i)
     data.sub$y <- expr[i,]
     fit <- lmerTest::lmer(formula=scd$design,
                 data=data.sub)
-    fit@beta[2]
+    c(fit@beta[2], summary(fit)$coefficients[2,5])
   })
+
+  expr_diff <- diffexpr[1,]
+  pval <- diffexpr[2,]
 
   loadings <- scd$vals[[cluster]]$loadings[,component]
   FI <- abs(loadings)*expr_diff
@@ -45,6 +48,8 @@ featureImportance <- function(expr,
 
   out <- list()
   out$FI <- FI
+  names(pval) <- names(FI)
   out$plot <- p
+  out$pval <- pval
   return(out)
 }

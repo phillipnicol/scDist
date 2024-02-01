@@ -1,4 +1,4 @@
-#' @import gggraph
+#' @import ggraph
 NULL
 
 #' @import Seurat
@@ -59,9 +59,12 @@ scDist_tree <- function(sco) {
   p <- p + geom_node_label(aes(label = name, angle = 90),
                            repel = FALSE, nudge_y = 0.25,
                            col = "midnightblue")
-  p <- p + labs(fill="Distance")+theme_graph()
-  p
+  p <- p + labs(fill="Distance")+theme_graph()+ theme(legend.position = "bottom")
+
+  return(p)
 }
+
+
 
 splitGroup <- function(sco_sub, ixs) {
   downsample <- min(100, nrow(sco_sub@meta.data))
