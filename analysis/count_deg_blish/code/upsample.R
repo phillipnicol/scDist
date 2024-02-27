@@ -1,5 +1,4 @@
 
-library(Seurat)
 library(scDist)
 library(SingleCellExperiment)
 library(Matrix)
@@ -72,7 +71,7 @@ time <- array(dim=c(length(ct.size), reps,2))
 for(i in 1:length(ct.size)) {
   for(j in 1:reps) {
     cat(i, " ", j, "\n")
-    ixs <- upsample(Sco,ct.size=ct.size[i])
+    ixs <- upsample(meta.data,ct.size=ct.size[i])
     meta.sub <- meta.data[ixs,]
     Y.sub <- Y.sct[,ixs]
 
