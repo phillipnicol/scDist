@@ -10,8 +10,8 @@ meta.data <- readRDS("../../data/blish_meta.RDS")
 
 upsample <- function(meta.data,ct.size) {
   ixs <- c()
-  for(ct in unique(meta.data$cell.type.coarse)) {
-    ix <- sample(which(meta.data$cell.type.coarse == ct), size=ct.size,
+  for(ct in unique(meta.data$cluster)) {
+    ix <- sample(which(meta.data$cluster == ct), size=ct.size,
                  replace=TRUE)
     ixs <- c(ixs,ix)
   }
