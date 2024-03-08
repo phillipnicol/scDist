@@ -84,7 +84,7 @@ mast_deg <- function(Y.norm, meta.sub, cts) {
     num.deg <- sum(fcHurdle[,6] < 0.05/nrow(Y.norm.sub))
     if(!is.na(num.deg)) {
       res[i,2] <- num.deg
-    }.   })
+    }   })
   }
 
 
