@@ -3,6 +3,8 @@ library(scDist)
 library(SingleCellExperiment)
 library(Matrix)
 library(muscat)
+library(MAST)
+library(tidyverse)
 
 Y.sct <- readRDS("../../data/blish_SCT_counts.RDS")
 Y.counts <- readMM("../../data/blish_raw_counts.txt")
@@ -46,6 +48,49 @@ muscat_deg <- function(sce.sub) {
   df
 }
 
+mast_deg <- function(Y.norm, meta.sub, cts) {
+  res <- data.frame(cts=cts, ndeg=0)
+
+  colnames(Y.norm) <- paste0("cell", 1:ncol(Y.norm))
+
+  for(i in 1:length(cts)) {
+    Y.norm.sub <- Y.norm[,meta.sub$cluster == cts[i]]
+    meta.sub.sub <- meta.sub[meta.sub$cluster == cts[i],]
+
+    df <- reshape2::melt(Y.norm.sub)
+    df <- df |> mutate(response=meta.sub.sub$response[Var2],
+                       sample=meta.sub.sub$sample[Var2])
+
+    sca <- FromFlatDF(df, idvars="Var2",
+                      primerid="Var1",
+                      measurement = "value",
+                      cellvars=c("response","sample"))
+    try({
+    fit <- zlm(~response+(1|sample),
+               sca,
+               method="glmer",
+               ebayes=FALSE,
+               strictConvergence=FALSE)
+
+    summaryCond <- suppressMessages(MAST::summary(fit,
+                                                  doLRT='responseHealthy'))
+    summaryDt <- summaryCond$datatable
+    fcHurdle <- merge(summaryDt[summaryDt$contrast=='responseHealthy'
+                                & summaryDt$component=='logFC', c(1,7,5,6,8)],
+                      summaryDt[summaryDt$contrast=='responseHealthy'
+                                & summaryDt$component=='H', c(1,4)],
+                      by = 'primerid')
+
+    num.deg <- sum(fcHurdle[,6] < 0.05/nrow(Y.norm.sub))
+    if(!is.na(num.deg)) {
+      res[i,2] <- num.deg
+    }.   })
+  }
+
+
+  return(res)
+}
+
 
 meta.data <- meta.data[,c("Status", "Donor", "cell.type.coarse")]
 colnames(meta.data) <- c("response", "sample", "cluster")
@@ -56,17 +101,19 @@ out.full <- scDist(Y.sct,
                    random.effects="sample",
                    clusters="cluster")
 
+
 sce <- SingleCellExperiment(assay=list(counts=Y.counts), colData=meta.data)
 
+deg.full <- muscat_deg(sce)
 
 
 set.seed(1)
 reps <- 20
 nc <- length(table(meta.data$cluster))
-cts <- unique(meta.data$cluster)
+cts <- rownames(out.full$results)
 ct.size <- round(10^{seq(log10(200), 4, length.out=10)})
-res <- array(dim=c(nc,length(ct.size),reps,2))
-time <- array(dim=c(length(ct.size), reps,2))
+res <- array(dim=c(nc,length(ct.size),reps,3))
+time <- array(dim=c(length(ct.size), reps,3))
 
 for(i in 1:length(ct.size)) {
   for(j in 1:reps) {
@@ -86,12 +133,20 @@ for(i in 1:length(ct.size)) {
 
     res[,i,j,1] <- out.sub$results$Dist.
 
+    #run Muscat
     sce.sub <- sce[,ixs]
     start <- Sys.time()
     df <- muscat_deg(sce.sub)
     end <- Sys.time()
     time[i,j,2] <- difftime(end,start,units="secs")
     res[,i,j,2] <- df$`#DS`
+
+    #Run MAST
+    start <- Sys.time()
+    mast.res <- mast_deg(Y.sub, meta.sub, cts)
+    end <- Sys.time()
+    res[,i,j,3] <- mast.res[,2]
+    time[i,j,3] <-  difftime(end,start,units="secs")
   }
 }
 
@@ -111,22 +166,71 @@ df <- df |> group_by(Var1, Var2, Var4) |> summarize(mean = mean(value))
 df$Var1 <- cts[df$Var1]
 df$Var2 <- ct.size[df$Var2]
 
+df$Var4 <- c("scDist", "nDEG")[df$Var4]
+
 p <- df |> ggplot(aes(x=Var2,y=mean,color=Var1)) +
   geom_point() +
-  geom_line() +
-  facet_wrap(~Var4) +
-  theme_bw()
+  geom_line(linetype="dashed") +
+  scale_x_log10() +
+  facet_wrap(~Var4, nrow=2, scales="free_y") +
+  theme_bw() +
+  xlab("# of cells per cell type")
 
 ggsave(plot=p, filename="../plots/upsample_ct_path.png")
 
+scDist.cor <- apply(res[,,,1], c(2,3), function(x) {
+  order(x)
+})
+
+deg.cor <- apply(res[,,,2], c(2,3), function(x) {
+  order(x)
+})
+
+
+df.scDist <- reshape2::melt(scDist.cor)
+df.scDist$method <- "scDist"
+df.deg <- reshape2::melt(deg.cor)
+df.deg$method <- "nDEG"
+df <- rbind(df.scDist, df.deg)
+df <- as.data.frame(df)
+
+
+df <- df |> group_by(Var1,Var2,method) |>
+  summarize(mean=median(value))
+
+df$Var1 <- cts[df$Var1]
+p <- df |> ggplot(aes(x=Var2,y=mean,color=Var1)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~method,nrow=2)
+
 ## Plot of correlation with ranking on full data
-df <- reshape2::melt(res)
 
 scDist.cor <- apply(res[,,,1], c(2,3), function(x) {
   cor(out.full$results$Dist., x)
 })
 
 deg.cor <- apply(res[,,,2], c(2,3), function(x) {
-  cor(out.full$results$Dist., x)
+  cor(deg.full$`#DS`, x)
 })
+
+df.scDist <- reshape2::melt(scDist.cor)
+df.scDist$method <- "scDist"
+df.deg <- reshape2::melt(deg.cor)
+df.deg$method <- "nDEG"
+df <- rbind(df.scDist, df.deg)
+df <- as.data.frame(df)
+
+df <- df |> group_by(Var1,method) |>
+  summarize(mean=mean(value),
+            sd=sd(value))
+
+p <- df |> ggplot(aes(x=Var1,y=mean,color=method,
+                      ymin=mean-sd,ymax=mean+sd)) +
+  geom_point() +
+  geom_line(linetype="dashed") +
+  geom_errorbar() +
+  theme_bw() +
+  xlab("# of cells per cell type") +
+  ylab("Correlation")
 
