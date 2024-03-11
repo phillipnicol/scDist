@@ -43,14 +43,16 @@ simCellType <- function(D,tau,G=1000,N1=5,N2=5,J=50,label="A",my.pi=0.9) {
   return(out)
 }
 
-count_deg <- function(Y,meta.data, cts) {
+count_deg <- function(Y, meta.data, cts) {
   perturb <- rep(0, length(cts))
   for(k in 1:length(cts)) {
     ixs <- which(meta.data$clusters == cts[k])
     Y.sub <- Y[,ixs]
     meta.sub <- meta.data[ixs,]
+    response <- meta.sub$response
+    patient <- meta.sub$patient
     p.vals <- apply(Y.sub, 1, function(y) {
-      fit <- lmer(y~meta.sub$response + (1|meta.sub$patient))
+      fit <- lmer(y~response + (1|patient))
       summary(fit)$coefficients[2,5]
     })
     perturb[k] <- sum(p.vals < 0.05)
