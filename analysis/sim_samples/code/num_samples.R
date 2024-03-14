@@ -104,3 +104,49 @@ for(i in 1:length(samples)) {
 }
 
 saveRDS(res, "../data/sim_results.RDS")
+
+res <- readRDS("../data/sim_results.RDS")
+
+
+library(tidyverse)
+
+#plot of cell types paths
+
+df <- reshape2::melt(res)
+df <- df |> group_by(Var1, Var2, Var4) |> summarize(mean = mean(value))
+
+df$Var1 <- LETTERS[1:10][df$Var1]
+df$Var2 <- samples[df$Var2]
+df$Var4 <- c("scDist", "nDEG (lme4)", "Augur")[df$Var4]
+
+p <- df |> ggplot(aes(x=Var2,y=mean,color=Var1)) +
+  geom_point() +
+  geom_line(linetype="dashed") +
+  scale_x_log10() +
+  facet_wrap(~Var4, nrow=3, scales="free_y") +
+  theme_bw() +
+  labs(color="Cell type")+
+  xlab("Number of patients") +
+  ylab("Perturbation")
+
+ggsave(p,
+       filename="../plots/many_samples_comparison.png")
+
+## Root Mean squared error
+df <- res[,,,1]
+df <- reshape2::melt(df)
+df <- df |> mutate(ground_truth=D.true[Var1]) |>
+  mutate(se=(value-ground_truth)^2) |>
+  group_by(Var2) |>
+  summarize(rmse=sqrt(mean(se)))
+
+df$Var2 <- samples[df$Var2]
+p <- ggplot(df,aes(x=Var2, y=rmse)) +
+  geom_point() + geom_line() +
+  scale_x_log10() +
+  xlab("Number of patients") +
+  ylab("RMSE")+
+  theme_bw()
+
+ggsave(p,
+       filename="../plots/many_samples_rmse.png")
