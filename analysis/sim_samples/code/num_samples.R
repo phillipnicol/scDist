@@ -150,3 +150,27 @@ p <- ggplot(df,aes(x=Var2, y=rmse)) +
 
 ggsave(p,
        filename="../plots/many_samples_rmse.png")
+
+
+## Spearman correlation
+
+sp.cor <- apply(res, 2:4, function(x) {
+  cor(x, D.true, method="spearman")
+})
+sp.cor[is.na(sp.cor)] <- 0
+df <- reshape2::melt(sp.cor)
+
+df <- df |> group_by(Var1, Var3) |> summarize(mean=mean(value))
+
+df$Var1 <- samples[df$Var1]
+df$Var3 <- c("scDist", "nDEG (lme4)", "Augur")[df$Var3]
+
+p <- df |> ggplot(aes(x=Var1,y=mean,color=Var3)) +
+  geom_point() +
+  geom_line(linetype="dashed") +
+  scale_x_log10() +
+  theme_bw() +
+  labs(color="Cell type")+
+  xlab("Number of patients") +
+  ylab("Spearman correlation")
+
