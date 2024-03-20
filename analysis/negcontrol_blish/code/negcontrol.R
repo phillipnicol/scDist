@@ -37,3 +37,6 @@ for(i in 1:reps) {
                 clusters="cell_type",d=20)
   res.pc[,i] <- out$results$Dist.
 }
+
+saveRDS(res.pc, "scDist_results.RDS")
+saveRDS(res.augur, "augur_results.RDS")
