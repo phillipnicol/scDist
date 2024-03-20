@@ -5,10 +5,12 @@ library(Seurat)
 
 library(Augur)
 library(ggplot2)
+library(scDist)
 
 ### Load wilk et al COVID-19 data
-Sco <- readRDS("../../data/blish_covid.seu.rds")
-Sco <- UpdateSeuratObject(Sco)
+#Sco <- readRDS("../../data/blish_covid.seu.rds")
+#Sco <- UpdateSeuratObject(Sco)
+load("../../data/blish_covid_seu.rda")
 
 Sco <- Sco[,Sco$Status == "Healthy"]
 
@@ -18,6 +20,7 @@ reps <- 20
 res.augur <- matrix(0.5,nrow=nc,ncol=reps)
 rownames(res.augur) <- unique(Sco$cell.type.coarse)
 res.pc <- matrix(0,nrow=nc,ncol=reps)
+res.pv <- matrix(0,nrow=nc,ncol=reps)
 rownames(res.pc) <- unique(Sco$cell.type.coarse)
 expr <- Sco@assays$SCT@scale.data
 
@@ -36,7 +39,9 @@ for(i in 1:reps) {
                 random.effects="sample",
                 clusters="cell_type",d=20)
   res.pc[,i] <- out$results$Dist.
+  res.pv[,i] <- out$results$p.val
 }
 
-saveRDS(res.pc, "scDist_results.RDS")
-saveRDS(res.augur, "augur_results.RDS")
+saveRDS(res.pc, "../data/scDist_results.RDS")
+saveRDS(res.augur, "../data/augur_results.RDS")
+saveRDS(res.pv, "../data/scDist_pval_results.RDS")
