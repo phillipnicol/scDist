@@ -83,3 +83,25 @@ p <- p + xlab("Cell type")
 p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ggsave(p, filename="../plots/scDist_pval.png")
+
+
+
+### FMT comparison
+res.pv <- readRDS("../data/scDist_pval_results_FMT.RDS")
+
+
+covid.pv <- res.pv |> as.data.frame()
+df.gg <- reshape2::melt(t(covid.pv))
+df.gg$value <- -log10(df.gg$value)
+
+p <- ggplot(data=df.gg,aes(x=Var2,y=value))
+p <- p + geom_boxplot(fill="lightblue",
+                      outlier.shape=NA)
+p <- p+geom_hline(yintercept=-log10(0.05),color="red",
+                  linetype="dashed")
+p <- p + theme_bw()
+p <- p + ylab("-log10 p-value (scDist)")
+p <- p + xlab("Cell type")
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+ggsave(p, filename="../plots/scDist_pval_FMT.png")
