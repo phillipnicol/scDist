@@ -2,6 +2,8 @@ library(lme4)
 library(lmerTest)
 library(scDist)
 library(Augur)
+library(muscat)
+library(SingleCellExperiment)
 
 simCellType <- function(D,tau,G=1000,N1=5,N2=5,J=50,label="A",my.pi=0.9) {
   beta_true <- rep(0,G)
@@ -52,8 +54,8 @@ count_deg <- function(Y, meta.data, cts) {
     response <- meta.sub$response
     patient <- meta.sub$patient
     p.vals <- apply(Y.sub, 1, function(y) {
-      fit <- lmer(y~response + (1|patient))
-      summary(fit)$coefficients[2,5]
+      fit <- lm(y~response)
+      summary(fit)$coefficients[2,4]
     })
     perturb[k] <- sum(p.vals < 0.05)
     print(perturb[k])
@@ -95,6 +97,7 @@ for(i in 1:reps) {
                 clusters="clusters",d=15)
 
   res[,i,1] <- out$results$Dist.
+
   res[,i,2] <- count_deg(Y, meta.data, cts)
 
   N1 <- 5; N2 <- 5
@@ -107,5 +110,13 @@ for(i in 1:reps) {
 saveRDS(res, "../data/sim_results.RDS")
 
 res <- readRDS("../data/sim_results.RDS")
+
+library(tidyverse)
+
+my.cor <- apply(res, c(2,3), function(x) {
+  cor(x, D.true, method="pearson")
+})
+my.cor[is.na(my.cor)] <- 0
+df <- reshape2::melt(my.cor)
 
 
