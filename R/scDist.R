@@ -31,13 +31,14 @@
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 scDist <- function(normalized_counts,
-                      meta.data,
-                      fixed.effects,
-                      random.effects=c(),
-                      clusters,
-                      d=20,
-                      truncate=FALSE,
-                      min.counts.per.cell=20) {
+                   meta.data,
+                   fixed.effects,
+                   random.effects=c(),
+                   clusters,
+                   d=20,
+                   truncate=FALSE,
+                   min.counts.per.cell=20,
+                   weights=NULL) {
   #Normalized counts currently in cells x genes
   normalized_counts <- t(normalized_counts)
 
@@ -76,6 +77,11 @@ scDist <- function(normalized_counts,
       next
     }
     pca.sub <- irlba::prcomp_irlba(x=normalized_counts.sub,n=d)
+    if(!is.null(weights)) {
+      weighted.U <- pca.sub$rotation * sqrt(weights)
+      weighted.scores <- normalized_counts.sub %*% weighted.U
+      pca.sub$x <- weighted.scores
+    }
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
