@@ -99,6 +99,9 @@ for(i in 1:reps) {
   res[i,3] <- abs(out3$results$Dist. - sim$D.true)
 }
 
+saveRDS(res, "../data/sim_res.RDS")
+
+res <- readRDS("../data/sim_res.RDS")
 
 library(tidyverse)
 
@@ -115,3 +118,4 @@ p <- ggplot(data=df,aes(x=Var2, y=value,fill=Var2)) +
   ylab("Absolute error") +
   theme(legend.position = "none")
 
+ggsave(p, filename="../plots/weighted_dist_sim.png")
