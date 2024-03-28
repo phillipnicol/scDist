@@ -58,6 +58,14 @@ scDist <- function(normalized_counts,
   data <- meta.data[,meta.cols, drop=FALSE]
   data$y <- rep(0,nrow(data))
 
+  if(!is.null(weights)) {
+    if(any(weights < 0)) {
+      stop("Weights must be positive")
+    }
+
+    #weights <- sqrt(ncol(normalized_counts))*weights/(sqrt(sum(weights^2)))
+  }
+
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
   distances <- c()

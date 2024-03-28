@@ -106,7 +106,7 @@ for(i in 1:length(samples)) {
 saveRDS(res, "../data/sim_results.RDS")
 
 res <- readRDS("../data/sim_results.RDS")
-
+samples <- c(2,3,5,10,20,50,100)
 
 library(tidyverse)
 
@@ -152,10 +152,10 @@ ggsave(p,
        filename="../plots/many_samples_rmse.png")
 
 
-## Spearman correlation
+## Pearson correlation
 
 sp.cor <- apply(res, 2:4, function(x) {
-  cor(x, D.true, method="spearman")
+  cor(x, D.true, method="pearson")
 })
 sp.cor[is.na(sp.cor)] <- 0
 df <- reshape2::melt(sp.cor)
@@ -172,5 +172,8 @@ p <- df |> ggplot(aes(x=Var1,y=mean,color=Var3)) +
   theme_bw() +
   labs(color="Cell type")+
   xlab("Number of patients") +
-  ylab("Spearman correlation")
+  ylab("Pearson correlation")
 
+
+ggsave(p,
+       filename="../plots/many_samples_cor.png")
