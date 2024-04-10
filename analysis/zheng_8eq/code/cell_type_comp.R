@@ -56,10 +56,14 @@ for(i in 1:nrow(cell.combos)) {
 
 saveRDS(cell.combos, "../data/cell.combos.dist.RDS")
 
+cell.combos <- readRDS("../data/cell.combos.dist.RDS")
 blish_res <- readRDS("../../blish/data/scDist_results.RDS")
 
 blish_dists <- blish_res$Dist.
 
+D <- matrix(cell.combos$dist, nrow=8,ncol=8)
+rownames(D) <- unique(cell.combos$Var1)
+colnames(D) <- rownames(D.1)
 zheng.dists <- as.vector(D[D>0])
 
 library(ggplot2)
@@ -76,24 +80,51 @@ p <- ggplot(data, aes(x = value, fill = variable)) +
   geom_density(alpha = 0.5) +
   labs(x = "Distance", y = "Density", fill = "Dataset") +
   scale_fill_manual(values = custom_colors,
-                    labels = c("Zheng Distances", "Blish Distances"),
+                    labels = c("Blish Distances", "Zheng Distances"),
                     name = "Dataset") +
   theme_bw()
 
+ggsave(p,
+       filename="../plots/blish_v_zheng_dist.png")
 
-D.3 <- matrix(cell.combos$deg, nrow=8, ncol=8)
-rownames(D.3) <- unique(meta$phenoid)
+
+## Multidimension scaling
+cell.combos$auc[is.na(cell.combos$auc)] <- 0
+D.1 <- matrix(cell.combos$dist, nrow=8,ncol=8)
+D.2 <- matrix(cell.combos$auc,nrow=8,ncol=8)
+D.3 <- matrix(cell.combos$degFDR, nrow=8, ncol=8)
+rownames(D.1) <- unique(cell.combos$Var1)
+colnames(D.1) <- rownames(D.1)
+rownames(D.2) <- unique(cell.combos$Var1)
+colnames(D.2) <- rownames(D.1)
+rownames(D.3) <- unique(cell.combos$Var1)
 colnames(D.3) <- rownames(D.3)
+my.mds1 <- cmdscale(D.1)
+my.mds2 <- cmdscale(D.2)
 my.mds3 <- cmdscale(D.3)
-df <- data.frame(x=my.mds3[,1],y=my.mds3[,2],text=rownames(my.mds3))
+
+
+df <- data.frame(x=c(my.mds1[,1],my.mds2[,1],my.mds3[,1]),
+                 y=c(my.mds1[,2],my.mds2[,2],my.mds3[,2]),
+                 text=rep(rownames(my.mds1),3),
+                 method=c(rep("scDist",8),
+                          rep("Augur",8),
+                          rep("nDEG", 8)))
 
 library(ggrepel)
 
 p <- ggplot(data=df,aes(x=x,y=y,label=text)) +
   geom_point() +
-  geom_text_repel()
+  geom_text_repel(box.padding = 0.5,
+                  point.padding = 0.5,
+                  segment.color = "gray50",
+                  segment.alpha = 0.5,
+                  color = "black",
+                  size = 3,
+                  max.overlaps = Inf) +
+  facet_wrap(~method, nrow=1,scales="free")
 
-
+ggsave(p, filename="../plots/mds.png")
 
 
 

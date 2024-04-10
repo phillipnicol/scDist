@@ -152,9 +152,14 @@ for(i in 1:length(ct.size)) {
 
 saveRDS(res, "../data/upsample_res.RDS")
 saveRDS(time, "../data/upsample_time.RDS")
+saveRDS(cts, "../data/cts.RDS")
+saveRDS(ct.size, "../data/ct.size.RDS")
+
 
 res <- readRDS("../data/upsample_res.RDS")
 time <- readRDS("../data/upsample_time.RDS")
+cts <- readRDS("../data/cts.RDS")
+ct.size <- readRDS("../data/ct.size.RDS")
 
 library(tidyverse)
 
@@ -178,59 +183,20 @@ p <- df |> ggplot(aes(x=Var2,y=mean,color=Var1)) +
 
 ggsave(plot=p, filename="../plots/upsample_ct_path.png")
 
-scDist.cor <- apply(res[,,,1], c(2,3), function(x) {
-  order(x)
-})
+## Timing
 
-deg.cor <- apply(res[,,,2], c(2,3), function(x) {
-  order(x)
-})
+df <- reshape2::melt(time)
+df$Var1 <- ct.size[df$Var1]
+df <- df |> group_by(Var1, Var3) |>
+  summarise(mean=mean(value)/60)
+df$Var3 <- c("scDist", "nDEG")[df$Var3]
 
+p <- ggplot(data=df,aes(x=Var1,
+                        y=mean,
+                        color=Var3)) +
+  geom_point() + geom_line() +
+  labs(color="Method", x="# of cells per cell type",
+       y="Average runtime (minutes)") +
+  theme_bw()
 
-df.scDist <- reshape2::melt(scDist.cor)
-df.scDist$method <- "scDist"
-df.deg <- reshape2::melt(deg.cor)
-df.deg$method <- "nDEG"
-df <- rbind(df.scDist, df.deg)
-df <- as.data.frame(df)
-
-
-df <- df |> group_by(Var1,Var2,method) |>
-  summarize(mean=median(value))
-
-df$Var1 <- cts[df$Var1]
-p <- df |> ggplot(aes(x=Var2,y=mean,color=Var1)) +
-  geom_point() +
-  geom_line() +
-  facet_wrap(~method,nrow=2)
-
-## Plot of correlation with ranking on full data
-
-scDist.cor <- apply(res[,,,1], c(2,3), function(x) {
-  cor(out.full$results$Dist., x)
-})
-
-deg.cor <- apply(res[,,,2], c(2,3), function(x) {
-  cor(deg.full$`#DS`, x)
-})
-
-df.scDist <- reshape2::melt(scDist.cor)
-df.scDist$method <- "scDist"
-df.deg <- reshape2::melt(deg.cor)
-df.deg$method <- "nDEG"
-df <- rbind(df.scDist, df.deg)
-df <- as.data.frame(df)
-
-df <- df |> group_by(Var1,method) |>
-  summarize(mean=mean(value),
-            sd=sd(value))
-
-p <- df |> ggplot(aes(x=Var1,y=mean,color=method,
-                      ymin=mean-sd,ymax=mean+sd)) +
-  geom_point() +
-  geom_line(linetype="dashed") +
-  geom_errorbar() +
-  theme_bw() +
-  xlab("# of cells per cell type") +
-  ylab("Correlation")
-
+ggsave(p, filename="../plots/upsample_runtime.png")
