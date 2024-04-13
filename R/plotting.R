@@ -96,3 +96,37 @@ plotBetas <- function(scd.object, cluster) {
   p
   return(p)
 }
+
+# Load the required package
+library(ggplot2)
+
+# Create a sample dataset
+set.seed(123)
+data <- data.frame(
+  value = rnorm(20, mean = 10, sd = 2)
+)
+
+#' @export
+distGenes <- function(scd.object, cluster) {
+  # Create the stripchart
+  G <- nrow(out$vals[[cluster]]$loadings)
+  up5 <- order(out$vals[[cluster]]$beta.hat)[1:5]
+  down5 <- order(out$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:5]
+  color <- rep("normal", G)
+  color[up5] <- "up"; color[down5] <- "down"
+  label <- ifelse(1:G %in% c(up5,down5), out$gene.names, "")
+  data <- data.frame(value=out$vals[[cluster]]$beta.hat,
+                     color=color,
+                     label=label)
+  p <- ggplot(data, aes(x = "", y = value, color=color,
+                   label=label)) +
+    geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
+    scale_color_manual(values=c("red", "grey90", "blue")) +
+    geom_text_repel(max.overlaps=Inf) +
+    labs(x = NULL, y = "Value") +  # Add y-axis label
+    coord_flip()+
+    guides(color="none") +
+    theme_bw()
+  print(p)
+  return(p)
+}

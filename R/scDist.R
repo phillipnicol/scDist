@@ -42,6 +42,9 @@ scDist <- function(normalized_counts,
   #Normalized counts currently in cells x genes
   normalized_counts <- t(normalized_counts)
 
+  G <- ncol(normalized_counts)
+  print(G)
+
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)
   design.null <- makeDesign(fixed.effects[-1],random.effects)
@@ -93,6 +96,8 @@ scDist <- function(normalized_counts,
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
+    beta.hat <- pca.sub$rotation %*% vals$beta
+    vals$beta.hat <- beta.hat
     out$vals[[i]] <- vals
     res <- rbind(res,c(vals$D.post.med,
                        vals$D.post.lb,
@@ -107,6 +112,7 @@ scDist <- function(normalized_counts,
                      "p.val")
   out$results <- res
   out$design <- design
+  out$gene.names <- colnames(normalized_counts)
 
   close(bar)
   return(out)

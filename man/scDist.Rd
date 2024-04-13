@@ -14,7 +14,8 @@ scDist(
   clusters,
   d = 20,
   truncate = FALSE,
-  min.counts.per.cell = 20
+  min.counts.per.cell = 20,
+  weights = NULL
 )
 }
 \arguments{

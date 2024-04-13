@@ -2,6 +2,7 @@
 
 export(DistPlot)
 export(FDRDistPlot)
+export(distGenes)
 export(featureImportance)
 export(plotBetas)
 export(scDist)
