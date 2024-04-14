@@ -13,6 +13,8 @@ Imports:
     irlba,
     ggplot2,
     ggpubr,
+    ggraph,
+    Seurat,
     data.table,
     ggrepel,
     lme4
