@@ -6,6 +6,7 @@ This update contains new functionality for post-hoc analysis and simulated data.
 
 * Tree 
 * Simulated data
+* distGenes
 
 **Changes to existing functionality:**
 
