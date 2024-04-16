@@ -25,12 +25,26 @@ cell.combos$degRAW <- 0
 
 Y <- Sco@assays$SCT@scale.data
 
+cell.type.sizes <- c(395,395, 50, 395,395,395,395,395)
+ixs <- c()
+set.seed(1)
+for(i in 1:length(unique(Sco@meta.data$phenoid))) {
+  jxs <- which(Sco@meta.data$phenoid == unique(Sco@meta.data$phenoid)[i])
+  jxs <- sample(jxs, size=cell.type.sizes[i], replace=FALSE)
+  ixs <- c(ixs, jxs)
+}
+
+Sco <- Sco[,ixs]
+
+Y <- Sco@assays$SCT@scale.data
+
 for(i in 1:nrow(cell.combos)) {
   if(cell.combos[i,1] == cell.combos[i,2]) {
     next
   }
 
   ixs <- which(Sco@meta.data$phenoid %in% cell.combos[i,1] | Sco@meta.data$phenoid %in% cell.combos[i,2])
+
   Y.sub <- Y[,ixs]
   meta.sub <- Sco@meta.data[ixs,]
   meta.sub$hold <- rep("A", nrow(meta.sub))
@@ -63,7 +77,7 @@ blish_dists <- blish_res$Dist.
 
 D <- matrix(cell.combos$dist, nrow=8,ncol=8)
 rownames(D) <- unique(cell.combos$Var1)
-colnames(D) <- rownames(D.1)
+colnames(D) <- rownames(D)
 zheng.dists <- as.vector(D[D>0])
 
 library(ggplot2)
@@ -91,7 +105,8 @@ ggsave(p,
 ## Multidimension scaling
 cell.combos$auc[is.na(cell.combos$auc)] <- 0
 D.1 <- matrix(cell.combos$dist, nrow=8,ncol=8)
-D.2 <- matrix(cell.combos$auc,nrow=8,ncol=8)
+#D.2 <- matrix(cell.combos$auc,nrow=8,ncol=8)
+D.2 <- D.1
 D.3 <- matrix(cell.combos$degFDR, nrow=8, ncol=8)
 rownames(D.1) <- unique(cell.combos$Var1)
 colnames(D.1) <- rownames(D.1)
@@ -104,11 +119,17 @@ my.mds2 <- cmdscale(D.2)
 my.mds3 <- cmdscale(D.3)
 
 
-df <- data.frame(x=c(my.mds1[,1],my.mds2[,1],my.mds3[,1]),
-                 y=c(my.mds1[,2],my.mds2[,2],my.mds3[,2]),
-                 text=rep(rownames(my.mds1),3),
+#df <- data.frame(x=c(my.mds1[,1],my.mds2[,1],my.mds3[,1]),
+#                 y=c(my.mds1[,2],my.mds2[,2],my.mds3[,2]),
+#                 text=rep(rownames(my.mds1),3),
+#                 method=c(rep("scDist",8),
+#                          rep("Augur",8),
+#                          rep("nDEG", 8)))
+
+df <- data.frame(x=c(my.mds1[,1],my.mds3[,1]),
+                 y=c(my.mds1[,2],my.mds3[,2]),
+                 text=rep(rownames(my.mds1),2),
                  method=c(rep("scDist",8),
-                          rep("Augur",8),
                           rep("nDEG", 8)))
 
 library(ggrepel)
@@ -129,5 +150,28 @@ ggsave(p, filename="../plots/mds.png")
 
 
 
+
+## Hclust
+library("ggdendro")
+
+#D <- readRDS("Dist_mat.RDS")
+my.dist <- as.dist(D.1)
+hc <- hclust(my.dist)
+
+p_d1 <- ggdendrogram(hc, rotate=FALSE, size=2)
+
+
+## Hclust
+library("ggdendro")
+
+#D <- readRDS("Dist_mat.RDS")
+my.dist <- as.dist(D.3)
+hc <- hclust(my.dist)
+
+p_d3 <- ggdendrogram(hc, rotate=FALSE, size=2)
+
+library(ggpubr)
+
+p <- ggarrange(p_d3, p_d1, nrow=1, labels=c("nDEG", "scDist"))
 
 

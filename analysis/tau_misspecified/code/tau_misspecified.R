@@ -118,8 +118,8 @@ simData2 <- function(nct=10, J=50, N1, N2, G=1000, nn=100) {
 
 ## Simulate Data
 set.seed(1)
-reps <- 10
-rate.try <- c(1,5,10, 20)
+reps <- 20
+rate.try <- sqrt(1:4)
 res <- matrix(0, nrow = reps, ncol=length(rate.try) + 1)
 
 for(i in 1:reps) {
@@ -148,9 +148,27 @@ for(i in 1:reps) {
   res[i,ncol(res)] <- abs(out$results$Dist. - sim$D.true)
 }
 
+saveRDS(res, file="../data/tau_misspecified.RDS")
 
 
+res <- readRDS(file="../data/tau_misspecified.RDS")
 
+rate.try <- sqrt(1:4)
+
+var.tested <- c(1/(rate.try^2), 0)
+
+library(tidyverse)
+
+df <- reshape2::melt(res)
+df$Var2 <- factor(round(var.tested[df$Var2],2))
+
+p <- ggplot(data=df,aes(x=Var2, y=value)) +
+  geom_boxplot() +
+  geom_jitter(width = 0.05, alpha = 0.5)  +
+  theme_bw() +
+  xlab("Variance of sigma_g") +
+  ylab("Absolute error") +
+  theme(legend.position = "none")
 
 
 
