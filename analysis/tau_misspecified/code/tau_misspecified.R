@@ -172,7 +172,7 @@ p <- ggplot(data=df,aes(x=Var2, y=value)) +
 
 
 
-
+ggsave(p, filename="../plots/tau_misspecified.png")
 
 
 
