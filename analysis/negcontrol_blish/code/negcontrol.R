@@ -1,5 +1,36 @@
 #Load Seurat
 library(Seurat)
+library(lme4)
+
+# Trabunzi code
+runTrabunzi <- function(expr, meta.data) {
+  lmm <- rep(0, length(unique(meta.data$cell_type)))
+
+  for(j in 1:length(unique(meta.data$cell_type))) {
+    ct <- unique(meta.data$cell_type)[j]
+    print(ct)
+    Y.sub <- expr[,meta.data$cell_type==ct]
+    G <- nrow(Y.sub)
+    meta.sub <- meta.data[meta.data$cell_type == ct,]
+
+    Y.sub <- rbind(Y.sub, meta.sub$label, meta.sub$sample)
+    rownames(Y.sub) <- c(paste0("Genes", 1:G), "Response", "Patient")
+    Y.sub <- t(Y.sub); Y.sub <- as.data.frame(Y.sub)
+    df <- reshape2::melt(Y.sub,id.vars=c("Response", "Patient"))
+    df$Patient <- as.factor(df$Patient); df$Response <- as.factor(df$Response)
+    df$value <- as.numeric(df$value)
+    df$VxR <- factor(df$variable:df$Response)
+    print(dim(df))
+    fit <- lmer(value ~ (1 | Patient) + (1 | variable) + (1 | VxR),
+                data=df)
+    random_effects <- VarCorr(fit)
+
+    lmm[j] <- sqrt(random_effects$`VxR`[1])
+    print(lmm[j])
+  }
+  return(lmm)
+}
+
 
 ## COVID_HC_TEST
 
@@ -21,9 +52,12 @@ res.augur <- matrix(0.5,nrow=nc,ncol=reps)
 rownames(res.augur) <- unique(Sco$cell.type.coarse)
 res.pc <- matrix(0,nrow=nc,ncol=reps)
 res.pv <- matrix(0,nrow=nc,ncol=reps)
+res.tb <- res.pc
 rownames(res.pc) <- unique(Sco$cell.type.coarse)
 rownames(res.pv) <- unique(Sco$cell.type.coarse)
 expr <- Sco@assays$SCT@scale.data
+
+runtime <- matrix(0, nrow=reps, ncol=3)
 
 for(i in 1:reps) {
   print(i)
@@ -36,16 +70,31 @@ for(i in 1:reps) {
 
   expr <- Sco@assays$SCT@scale.data
 
+  start <- Sys.time()
   out <- scDist(expr,meta.data,fixed.effects="label",
                 random.effects="sample",
                 clusters="cell_type",d=20)
+  end <- Sys.time()
+  runtime[i,1] <- difftime(end,start,units="secs")
+
+
   res.pc[,i] <- out$results$Dist.
   res.pv[,i] <- out$results$p.val
+
+  start <- Sys.time()
+  res.tb[,i] <- runTrabunzi(expr,meta.data)
+  end <- Sys.time()
+  runtime[i,3] <- difftime(end,start,units="secs")
 }
+
 
 saveRDS(res.pc, "../data/scDist_results.RDS")
 saveRDS(res.augur, "../data/augur_results.RDS")
 saveRDS(res.pv, "../data/scDist_pval_results.RDS")
+saveRDS(res.tb, "../data/trabunzi_results.RDS")
+saveRDS(runtime, "../data/runtime.RDS")
+
+stop("Stopping")
 
 
 res.pc  <- readRDS("../data/scDist_results.RDS")
@@ -83,7 +132,6 @@ p <- p + xlab("Cell type")
 p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ggsave(p, filename="../plots/scDist_pval.png")
-
 
 
 ### FMT comparison
