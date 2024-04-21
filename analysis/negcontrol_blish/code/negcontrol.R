@@ -153,3 +153,26 @@ p <- p + xlab("Cell type")
 p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 
 ggsave(p, filename="../plots/scDist_pval_FMT.png")
+
+
+
+## Trabunzi
+res.tb <- readRDS("../data/trabunzi_results.RDS")
+runtime <- readRDS("../data/runtime.RDS")
+rownames(res.tb) <- rownames(res.pc)
+
+library(tidyverse)
+
+covid.tb <- res.tb |> as.data.frame()
+df.gg <- reshape2::melt(t(covid.tb))
+
+p <- ggplot(data=df.gg,aes(x=Var2,y=value,group=Var2))
+p <- p + geom_boxplot(fill="lightblue")
+p <- p+geom_hline(yintercept=0,color="red",
+                  linetype="dashed")
+p <- p + theme_bw()
+p <- p + ylab("Variance")
+p <- p + xlab("Cell type")
+p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+
+
