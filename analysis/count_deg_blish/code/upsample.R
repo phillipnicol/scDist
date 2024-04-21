@@ -200,3 +200,47 @@ p <- ggplot(data=df,aes(x=Var1,
   theme_bw()
 
 ggsave(p, filename="../plots/upsample_runtime.png")
+
+
+set.seed(42)
+res.1 <- res[,,,1]
+res.2 <- res[,,,2]
+for(i in 1:20) {
+  for(j in 1:13) {
+    res.1[j,,i] <- sample(res.1[j,,i], size=10, replace=FALSE)
+    res.2[j,,i] <- sample(res.2[j,,i], size=10, replace=FALSE)
+  }
+}
+
+gt <- rep(0,13); gt[c(2,6)] <- 1
+TPR1 <- apply(res.1, 2:3, function(x) {
+  pred <- rep(0,13)
+  pred[order(x,decreasing=TRUE)[1:2]] <- 1
+  sum(gt[c(2,6)] == pred[c(2,6)])/2
+})
+
+gt <- rep(0,13); gt[1:2] <- 1
+TPR2 <- apply(res.2, 2:3, function(x) {
+  pred <- rep(0,13)
+  pred[order(x,decreasing=TRUE)[1:2]] <- 1
+  sum(gt[c(1,2)] == pred[c(1,2)])/2
+})
+
+df <- data.frame(scDist = as.vector(TPR1),
+                 nDEG = as.vector(TPR2))
+df <- reshape2::melt(df)
+
+df$value <- as.character(df$value)
+
+p <- ggplot(data=df,aes(x=value,fill=variable)) +
+  geom_bar() +
+  scale_fill_manual(values=c("forestgreen",
+                              "firebrick")) +
+  facet_wrap(~variable,nrow=2) +
+  theme_bw() +
+  guides(fill="none") +
+  xlab("True positive rate")
+
+
+ggsave(p, filename="../data/scDist_nDEG_TPR.png")
+
