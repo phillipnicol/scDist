@@ -158,6 +158,7 @@ ggsave(p, filename="../plots/scDist_pval_FMT.png")
 
 ## Trabunzi
 res.tb <- readRDS("../data/trabunzi_results.RDS")
+res.pc <- readRDS("../data/scDist_pval_results.RDS")
 runtime <- readRDS("../data/runtime.RDS")
 rownames(res.tb) <- rownames(res.pc)
 
@@ -174,5 +175,25 @@ p <- p + theme_bw()
 p <- p + ylab("Variance")
 p <- p + xlab("Cell type")
 p <- p + theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+p1 <- p
 
 
+runtime.comp <- runtime[,c(1,3)]
+df <- reshape2::melt(runtime.comp)
+df$Var2 <- c("scDist", "Trabunzi")[df$Var2]
+
+p <- ggplot(data=df,aes(x=Var2,group=Var2, y=value/60)) +
+  geom_boxplot(fill="lightgreen") +
+  theme_bw() +
+  scale_y_log10() +
+  ylab("Runtime in minutes") +
+  xlab("")
+p2 <- p
+
+library(ggpubr)
+
+p <- ggarrange(p1, p2, nrow=2,labels=c("a","b"),
+               heights=c(1.5,1))
+
+ggsave(p, filename="../plots/trabunzi.png",
+       width=5, height=4,units="in")
