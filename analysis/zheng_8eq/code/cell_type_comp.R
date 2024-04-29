@@ -1,5 +1,6 @@
 
 
+
 library(DuoClustering2018)
 library(Seurat)
 library(SingleCellExperiment)
@@ -25,7 +26,12 @@ cell.combos$degRAW <- 0
 
 Y <- Sco@assays$SCT@scale.data
 
-cell.type.sizes <- c(395,395, 50, 395,395,395,395,395)
+#cell.type.sizes <- c(395,395, 50, 395,395,395,395,395)
+#cell.type.sizes <- seq(25,395,length.out=8)
+#cell.type.sizes <- sample(cell.type.sizes,
+#                          size=8,
+#                          replace=FALSE)
+cell.type.sizes <- rep(25,8)
 ixs <- c()
 set.seed(1)
 for(i in 1:length(unique(Sco@meta.data$phenoid))) {
@@ -67,6 +73,7 @@ for(i in 1:nrow(cell.combos)) {
   cell.combos$degRAW[i] <- sum(pvals < 0.05)
   cell.combos$degFDR[i] <- sum(p.adjust(pvals,method="fdr") < 0.05)
 }
+
 
 saveRDS(cell.combos, "../data/cell.combos.dist.RDS")
 
@@ -143,7 +150,9 @@ p <- ggplot(data=df,aes(x=x,y=y,label=text)) +
                   color = "black",
                   size = 3,
                   max.overlaps = Inf) +
-  facet_wrap(~method, nrow=1,scales="free")
+  facet_wrap(~method, nrow=1,scales="free") +
+  theme_bw() +
+  xlab("MDS1") + ylab("MDS2")
 
 ggsave(p, filename="../plots/mds.png")
 
