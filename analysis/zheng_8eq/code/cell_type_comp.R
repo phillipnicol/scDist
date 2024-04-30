@@ -26,12 +26,11 @@ cell.combos$degRAW <- 0
 
 Y <- Sco@assays$SCT@scale.data
 
-#cell.type.sizes <- c(395,395, 50, 395,395,395,395,395)
+cell.type.sizes <- c(395,395, 20, 395,395,395,395,395)
 #cell.type.sizes <- seq(25,395,length.out=8)
 #cell.type.sizes <- sample(cell.type.sizes,
 #                          size=8,
 #                          replace=FALSE)
-cell.type.sizes <- rep(25,8)
 ixs <- c()
 set.seed(1)
 for(i in 1:length(unique(Sco@meta.data$phenoid))) {
@@ -58,7 +57,8 @@ for(i in 1:nrow(cell.combos)) {
   out <- scDist(normalized_counts = Y.sub,
                 meta.data = meta.sub,
                 fixed.effects = "phenoid",
-                clusters="hold")
+                clusters="hold",
+                d=10)
 
   cell.combos$dist[i] <- out$results$Dist.
 
@@ -114,7 +114,7 @@ cell.combos$auc[is.na(cell.combos$auc)] <- 0
 D.1 <- matrix(cell.combos$dist, nrow=8,ncol=8)
 #D.2 <- matrix(cell.combos$auc,nrow=8,ncol=8)
 D.2 <- D.1
-D.3 <- matrix(cell.combos$degFDR, nrow=8, ncol=8)
+D.3 <- matrix(cell.combos$degBF, nrow=8, ncol=8)
 rownames(D.1) <- unique(cell.combos$Var1)
 colnames(D.1) <- rownames(D.1)
 rownames(D.2) <- unique(cell.combos$Var1)
