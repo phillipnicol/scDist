@@ -75,6 +75,6 @@ condition_v_celltype_distance <- function(normalized_counts,
 
   out <- list()
   out$D <- D
-  out$plot <- plot
+  out$plot <- p
   return(out)
 }
