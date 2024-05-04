@@ -123,7 +123,7 @@ distGenes <- function(scd.object, cluster) {
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
     geom_text_repel(max.overlaps=Inf) +
-    labs(x = NULL, y = "Value") +  # Add y-axis label
+    labs(x = NULL, y = "Condition difference") +
     coord_flip()+
     guides(color="none") +
     theme_bw()
