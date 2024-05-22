@@ -158,6 +158,54 @@ hc <- hclust(my.dist)
 p_d3 <- ggdendrogram(hc, rotate=FALSE, size=2)
 p_d3 <- p_d3 + ggtitle("nDEG") + theme(plot.title = element_text(hjust = 0.5))
 
+
+
+##Equal
+cell.combos <- readRDS(file.path(path,"cell.combos.dist.equal.RDS"))
+
+cell.combos$auc[is.na(cell.combos$auc)] <- 0
+D.1 <- matrix(cell.combos$dist, nrow=8,ncol=8)
+#D.2 <- matrix(cell.combos$auc,nrow=8,ncol=8)
+D.2 <- D.1
+D.3 <- matrix(cell.combos$degFDR, nrow=8, ncol=8)
+rownames(D.1) <- unique(cell.combos$Var1)
+colnames(D.1) <- rownames(D.1)
+rownames(D.2) <- unique(cell.combos$Var1)
+colnames(D.2) <- rownames(D.1)
+rownames(D.3) <- unique(cell.combos$Var1)
+colnames(D.3) <- rownames(D.3)
+
+
+#df <- data.frame(x=c(my.mds1[,1],my.mds2[,1],my.mds3[,1]),
+#                 y=c(my.mds1[,2],my.mds2[,2],my.mds3[,2]),
+#                 text=rep(rownames(my.mds1),3),
+#                 method=c(rep("scDist",8),
+#                          rep("Augur",8),
+#                          rep("nDEG", 8)))
+
+
+
+## Hclust
+library("ggdendro")
+
+#D <- readRDS("Dist_mat.RDS")
+my.dist <- as.dist(D.1)
+hc <- hclust(my.dist)
+
+p_d1.equal <- ggdendrogram(hc, rotate=FALSE, size=2)
+p_d1.equal <- p_d1.equal + ggtitle("scDist") + theme(plot.title = element_text(hjust = 0.5))
+
+#D <- readRDS("Dist_mat.RDS")
+my.dist <- as.dist(D.3)
+hc <- hclust(my.dist)
+
+p_d3.equal <- ggdendrogram(hc, rotate=FALSE, size=2)
+p_d3.equal <- p_d3.equal + ggtitle("nDEG") + theme(plot.title = element_text(hjust = 0.5))
+
+p <- ggarrange(p_d1.equal, p_d3.equal)
+ggsave(p, filename="zheng_full.pdf")
+
+
 library(ggpubr)
 
 
@@ -166,3 +214,5 @@ p <- ggarrange(pb,pa,p_d3,p_d1,
 
 
 ggsave(p, filename="count_deg_updated.pdf",height=8,width=8)
+
+
