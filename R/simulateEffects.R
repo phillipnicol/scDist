@@ -1,4 +1,3 @@
-#' @export
 sim_scDist <- function(nn,
                       dist_true,
                       tau,

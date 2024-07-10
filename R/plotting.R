@@ -1,6 +1,9 @@
 #' @import ggplot2
 NULL
 
+#' @importFrom ggrepel geom_text_repel
+NULL
+
 #' @export
 #'
 #' @title Plot the results of scDist
@@ -107,6 +110,18 @@ data <- data.frame(
 )
 
 #' @export
+#'
+#' @title Plot the direction of the perturbation
+#'
+#' @description Plot the distance estimates and corresponding standard
+#' errors
+#'
+#' @param scd.object A list obtained from applying the main function scDist.
+#' @param cluster The cluster to make the plot for
+#'
+#' @return A `ggplot2` object containing the plot
+#'
+#' @author Phillip B. Nicol <philnicol740@gmail.com>
 distGenes <- function(scd.object, cluster) {
   # Create the stripchart
   G <- nrow(out$vals[[cluster]]$loadings)
@@ -122,11 +137,11 @@ distGenes <- function(scd.object, cluster) {
                    label=label)) +
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
-    geom_text_repel(max.overlaps=Inf) +
+    ggrepel::geom_text_repel(max.overlaps=Inf) +
     labs(x = NULL, y = "Condition difference") +
     coord_flip()+
     guides(color="none") +
     theme_bw()
-  print(p)
+  #print(p)
   return(p)
 }

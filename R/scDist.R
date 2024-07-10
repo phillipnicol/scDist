@@ -19,6 +19,8 @@
 #' @param d The number of PCs to use.
 #' @param truncate Whether or not to round negative distances to 0.
 #' @param min.counts.per.cell The minimum number of cells per cluster to perform the estimation.
+#' @param weights An optional vector of length equal to the number of genes specifying the weight
+#' to place on each gene in the distance estimate.
 #'
 #' @return A list with components
 #' \itemize{

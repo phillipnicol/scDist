@@ -1,14 +1,12 @@
 simCellType <- function(D,tau,G=1000,N1=5,N2=5,J=50,label="A",my.pi=0.9) {
   beta_true <- rep(0,G)
 
-  print(my.pi)
   z <- sample(1:2,size=G,replace=TRUE, prob=c(my.pi,1-my.pi))
   beta_true[z == 1] <- rnorm(n=sum(z==1), mean=0, sd=0.1)
   beta_true[z == 2] <- rnorm(n=sum(z==2), mean=0, sd=1)
 
   beta_true <- D/sqrt(sum(beta_true^2))*beta_true
 
-  print(J)
   y <- matrix(0, nrow=(N1+N2)*J,ncol=G)
   for(i in 1:G) {
     cntr <- 1
@@ -39,7 +37,28 @@ simCellType <- function(D,tau,G=1000,N1=5,N2=5,J=50,label="A",my.pi=0.9) {
 }
 
 
-
+#' @export
+#' @title Simulate data according to the scDist model
+#'
+#' @description Simulate data according to the scDist model
+#'
+#' @param nct The number of cell types.
+#' @param J The number of cells per cell type.
+#' @param N1 The number of patients in first condition (reference).
+#' @param N2 The number of patients in second condition.
+#' @param G The number of genes.
+#' @param nn The number of non-null genes between the conditions.
+#' @param tau The standard deviation of the patient-specific effect.
+#'
+#' @return A list with components
+#' \itemize{
+#' \item \code{Y} - A matrix containing normalized counts (genes x cells).
+#' \item \code{meta.data} - Metadata that can be used as input to `scDist`.
+#' \item \code{D.true} - The true distance
+#' }
+#'
+#' @author Phillip B. Nicol <philnicol740@gmail.com>
+#'
 simData <- function(nct=10, J=50, N1, N2, G=1000, nn=100,tau=0.5) {
   Y <- matrix(0,nrow=G,ncol=0)
   meta.data <- data.frame(response=NULL,
