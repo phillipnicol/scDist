@@ -19,6 +19,8 @@
 #' @param d The number of PCs to use.
 #' @param truncate Whether or not to round negative distances to 0.
 #' @param min.counts.per.cell The minimum number of cells per cluster to perform the estimation.
+#' @param weights An optional vector of length equal to the number of genes specifying the weight
+#' to place on each gene in the distance estimate.
 #'
 #' @return A list with components
 #' \itemize{
@@ -31,15 +33,19 @@
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 scDist <- function(normalized_counts,
-                      meta.data,
-                      fixed.effects,
-                      random.effects=c(),
-                      clusters,
-                      d=20,
-                      truncate=FALSE,
-                      min.counts.per.cell=20) {
+                   meta.data,
+                   fixed.effects,
+                   random.effects=c(),
+                   clusters,
+                   d=20,
+                   truncate=FALSE,
+                   min.counts.per.cell=20,
+                   weights=NULL) {
   #Normalized counts currently in cells x genes
   normalized_counts <- t(normalized_counts)
+
+  G <- ncol(normalized_counts)
+  print(G)
 
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)
@@ -56,6 +62,14 @@ scDist <- function(normalized_counts,
   }, integer(1))
   data <- meta.data[,meta.cols, drop=FALSE]
   data$y <- rep(0,nrow(data))
+
+  if(!is.null(weights)) {
+    if(any(weights < 0)) {
+      stop("Weights must be positive")
+    }
+
+    #weights <- sqrt(ncol(normalized_counts))*weights/(sqrt(sum(weights^2)))
+  }
 
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
@@ -76,9 +90,16 @@ scDist <- function(normalized_counts,
       next
     }
     pca.sub <- irlba::prcomp_irlba(x=normalized_counts.sub,n=d)
+    if(!is.null(weights)) {
+      weighted.U <- pca.sub$rotation * sqrt(weights)
+      weighted.scores <- normalized_counts.sub %*% weighted.U
+      pca.sub$x <- weighted.scores
+    }
     data.sub <- data[ix,]
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
+    beta.hat <- pca.sub$rotation %*% vals$beta
+    vals$beta.hat <- beta.hat
     out$vals[[i]] <- vals
     res <- rbind(res,c(vals$D.post.med,
                        vals$D.post.lb,
@@ -93,6 +114,7 @@ scDist <- function(normalized_counts,
                      "p.val")
   out$results <- res
   out$design <- design
+  out$gene.names <- colnames(normalized_counts)
 
   close(bar)
   return(out)
@@ -108,6 +130,7 @@ pcDiff <- function(pca,
   beta <- rep(0,d)
   beta_sd <- rep(0,d)
   dfs <- rep(0,d)
+  #sigmas <- rep(0, d) #Delete later
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
@@ -116,6 +139,7 @@ pcDiff <- function(pca,
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]
+      #sigmas[i] <- fit@sigma
 
     } else {
       fit <- lm(formula=design,data=data)
@@ -151,6 +175,11 @@ pcDiff <- function(pca,
   W.max <- max((beta/beta_sd)^2)
 
   #Monte carlo p-value
+  ## DELETE THIS PART LATER
+  #Amean <- rep(0,d)
+  #fit.fmt <- fmt::fmt(Amean=Amean, sigmasq=sigmas^2,
+  #                    df=dfs, b=5)
+  #dfs <- fit.fmt$df.post
   mcreps <- 10^5
   mymax <- rep(0,mcreps)
   mysum <- rep(0,mcreps)

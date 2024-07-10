@@ -1,21 +1,22 @@
 Package: scDist
 Type: Package
 Title: Robust Identification of Perturbed Cell Types in Single-cell RNA-seq 
-Version: 1.0.0
-Date: 2023-05-26
+Version: 1.1.0
+Date: 2024-07-10
 Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Maintainer: Phillip B. Nicol <philnicol740@gmail.com>
+Description: Identifies cell types that have transcriptional differences between two biological conditions while controlling for unwanted variability. See Nicol et al. (2023) <doi: 10.1101/2023.05.06.539326>.
+License: MIT
 Imports:
     lmerTest,
     irlba,
     ggplot2,
     ggpubr,
+    ggraph,
+    Seurat,
     data.table,
     ggrepel,
     lme4
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
