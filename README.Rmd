@@ -20,7 +20,7 @@ From the R console, `devtools::install_github("phillipnicol/scDist")`. Installat
 
 The input to `scDist` is a normalized count matrix and correpsonding metadata that describes what condition and patient each cell belongs to. In this demo, we create a simulated dataset with 10 cell types. The demo should take less than a minute to run on a standard machine. The code is also modifiable to see how `scDist` performs for different parameter values.
 
-```{r}
+```{r, echo=FALSE}
 library(scDist)
 set.seed(1126490984)
 ```

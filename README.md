@@ -23,10 +23,6 @@ should take less than a minute to run on a standard machine. The code is
 also modifiable to see how `scDist` performs for different parameter
 values.
 
-``` r
-library(scDist)
-```
-
     ## The legacy packages maptools, rgdal, and rgeos, underpinning the sp package,
     ## which was just loaded, will retire in October 2023.
     ## Please refer to R-spatial evolution reports for details, especially
@@ -35,10 +31,6 @@ library(scDist)
     ## package maintainers should consider adding sf to Suggests:.
     ## The sp package is now running under evolution status 2
     ##      (status 2 uses the sf package in place of rgdal)
-
-``` r
-set.seed(1126490984)
-```
 
 Generate simulated data with 10 cell types and 5 patients in each group:
 
