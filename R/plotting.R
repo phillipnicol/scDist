@@ -124,20 +124,23 @@ data <- data.frame(
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 distGenes <- function(scd.object, cluster) {
   # Create the stripchart
-  G <- nrow(out$vals[[cluster]]$loadings)
-  up5 <- order(out$vals[[cluster]]$beta.hat)[1:5]
-  down5 <- order(out$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:5]
+  G <- nrow(scd.object$vals[[cluster]]$loadings)
+  up5 <- order(scd.object$vals[[cluster]]$beta.hat)[1:5]
+  down5 <- order(scd.object$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:5]
   color <- rep("normal", G)
   color[up5] <- "up"; color[down5] <- "down"
-  label <- ifelse(1:G %in% c(up5,down5), out$gene.names, "")
-  data <- data.frame(value=out$vals[[cluster]]$beta.hat,
+
+  # Needs to be updated??
+  # label <- ifelse(1:G %in% c(up5,down5), scd.object$gene.names, "")
+
+  data <- data.frame(value=scd.object$vals[[cluster]]$beta.hat,
                      color=color,
                      label=label)
   p <- ggplot(data, aes(x = "", y = value, color=color,
                    label=label)) +
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
-    geom_text_repel(max.overlaps=Inf) +
+    ggrepel::geom_text_repel(max.overlaps=Inf) +
     labs(x = NULL, y = "Condition difference") +
     coord_flip()+
     guides(color="none") +
