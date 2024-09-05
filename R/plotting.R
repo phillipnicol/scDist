@@ -130,8 +130,7 @@ distGenes <- function(scd.object, cluster) {
   color <- rep("normal", G)
   color[up5] <- "up"; color[down5] <- "down"
 
-  # Needs to be updated??
-  # label <- ifelse(1:G %in% c(up5,down5), scd.object$gene.names, "")
+  label <- ifelse(1:G %in% c(up5,down5), scd.object$gene.names, "")
 
   data <- data.frame(value=scd.object$vals[[cluster]]$beta.hat,
                      color=color,
