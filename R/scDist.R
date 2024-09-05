@@ -31,7 +31,6 @@
 #' included.
 #' }
 #'
-#' @importFrom rlang is_installed
 #' @importFrom irlba prcomp_irlba
 #' @importFrom lmerTest lmer
 #' @importFrom lme4 lmerControl
