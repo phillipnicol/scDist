@@ -118,11 +118,6 @@ plotBetas <- function(
   return(p)
 }
 
-# Create a sample dataset
-set.seed(123)
-data <- data.frame(
-  value = rnorm(20, mean = 10, sd = 2)
-)
 
 #' @export
 #'
