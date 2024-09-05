@@ -67,7 +67,7 @@ FDRDistPlot <- function(
   p <- p + ylab("-log10 FDR")
   p <- p + guides(color="none",alpha="none")
 
-  return(out)
+  return(p)
 }
 
 #' plotBetas
