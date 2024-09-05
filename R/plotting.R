@@ -1,9 +1,3 @@
-#' @import ggplot2
-NULL
-
-#' @importFrom ggrepel geom_text_repel
-NULL
-
 #' @export
 #'
 #' @title Plot the results of scDist
@@ -13,14 +7,14 @@ NULL
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #'
-#' @return If return.plot is true, a ggplot object is returned. Otherwise,
-#' nothing is returned.
+#' @return A `ggplot2` object
+#'
+#' @import ggplot2
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 
 DistPlot <- function(
-    scd.object,
-    return.plot=FALSE
+    scd.object
 ) {
   results <- scd.object$results
   results <- results[order(results$Dist.,decreasing=FALSE),]
@@ -47,6 +41,9 @@ DistPlot <- function(
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
+#'
 #' @export
 
 FDRDistPlot <- function(
@@ -62,7 +59,7 @@ FDRDistPlot <- function(
   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
   p <- p + scale_color_manual(values=c("grey","orange"))
   p <- p + geom_point()
-  p <- p + ggrepel::geom_text_repel(max.overlaps=Inf)
+  p <- p + geom_text_repel(max.overlaps=Inf)
   p <- p + geom_hline(yintercept=1,color="blue",
                       linetype="dashed")
   p <- p + theme_linedraw()
@@ -83,6 +80,9 @@ FDRDistPlot <- function(
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
+#'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
 #'
 #' @export
 
@@ -106,14 +106,14 @@ plotBetas <- function(
     }
     else {" "}
   })
-  p <- ggplot2::ggplot(df,ggplot2::aes(x=dim,y=beta))
-  p <- p + geom_segment(ggplot2::aes(x=dim,xend=dim,y=0,yend=beta))
-  p <- p + ggplot2::geom_point(size=2,color="purple")
+  p <- ggplot(df,aes(x=dim,y=beta))
+  p <- p + geom_segment(aes(x=dim,xend=dim,y=0,yend=beta))
+  p <- p + geom_point(size=2,color="purple")
   #df$beta <- ifelse(df$beta > 0, df$beta+0.35, df$beta-0.35)
-  #p <- p + ggplot2::geom_text(data=df, ggplot2::aes(label=signif,x=dim,y=beta))
-  p <- p + ggplot2::labs(x="PC Dimension", y=expression(U*beta[k]))
-  p <- p + ggplot2::ggtitle(label=cluster)
-  p <- p + ggplot2::theme_linedraw()
+  #p <- p + geom_text(data=df, aes(label=signif,x=dim,y=beta))
+  p <- p + labs(x="PC Dimension", y=expression(U*beta[k]))
+  p <- p + ggtitle(label=cluster)
+  p <- p + theme_linedraw()
   p
   return(p)
 }
@@ -135,6 +135,9 @@ data <- data.frame(
 #' @param cluster The cluster to make the plot for
 #'
 #' @return A `ggplot2` object containing the plot
+#'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
 
