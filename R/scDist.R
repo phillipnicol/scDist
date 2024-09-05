@@ -130,7 +130,6 @@ pcDiff <- function(pca,
   beta <- rep(0,d)
   beta_sd <- rep(0,d)
   dfs <- rep(0,d)
-  #sigmas <- rep(0, d) #Delete later
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
@@ -139,7 +138,6 @@ pcDiff <- function(pca,
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]
-      #sigmas[i] <- fit@sigma
 
     } else {
       fit <- lm(formula=design,data=data)
@@ -175,11 +173,6 @@ pcDiff <- function(pca,
   W.max <- max((beta/beta_sd)^2)
 
   #Monte carlo p-value
-  ## DELETE THIS PART LATER
-  #Amean <- rep(0,d)
-  #fit.fmt <- fmt::fmt(Amean=Amean, sigmasq=sigmas^2,
-  #                    df=dfs, b=5)
-  #dfs <- fit.fmt$df.post
   mcreps <- 10^5
   mymax <- rep(0,mcreps)
   mysum <- rep(0,mcreps)

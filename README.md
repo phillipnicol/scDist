@@ -115,5 +115,6 @@ distGenes(out, cluster = "a")
 If you use `scDist` in your work, please cite:
 
 Nicol, P.B., Paulson, D., Qian, G., Liu, X.S., Irizarry, R.A., and Sahu,
-A.D. (2023). Robust identification of perturbed cell types in
-single-cell RNA-seq data. bioRxiv.
+A.D. (2024). Robust identification of perturbed cell types in
+single-cell RNA-seq data. *Nature Communications*. Vol 15(7610).
+<https://doi.org/10.1038/s41467-024-51649-3>.
