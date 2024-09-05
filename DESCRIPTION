@@ -16,7 +16,8 @@ Imports:
     Seurat,
     data.table,
     ggrepel,
-    lme4
+    lme4,
+    ashr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
