@@ -7,7 +7,7 @@
 distGenes(scd.object, cluster)
 }
 \arguments{
-\item{scd.object}{A list obtained from applying the main function scDist.}
+\item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
 
 \item{cluster}{The cluster to make the plot for}
 }

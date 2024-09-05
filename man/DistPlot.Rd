@@ -7,12 +7,10 @@
 DistPlot(scd.object, return.plot = FALSE)
 }
 \arguments{
-\item{scd.object}{A list obtained from applying the main function scDist.}
-
-\item{return.plot}{If true, return the ggplot object}
+\item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
 }
 \value{
-If return.plot is true, a gglot object is retured. Otherwise,
+If return.plot is true, a ggplot object is returned. Otherwise,
 nothing is returned.
 }
 \description{
