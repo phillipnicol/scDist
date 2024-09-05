@@ -1,3 +1,7 @@
+## Version 1.1.1 September 4, 2024
+
+This update primarily addresses bugs in `distGenes`.
+
 ## Version 1.1.0 July 10, 2024
 
 This update contains new functionality for post-hoc analysis and simulated data.
