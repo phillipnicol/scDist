@@ -127,6 +127,7 @@ plotBetas <- function(
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
+#' @param num_genes number of up/down genes to plot, default is 5.
 #'
 #' @return A `ggplot2` object containing the plot
 #'
@@ -137,16 +138,17 @@ plotBetas <- function(
 
 distGenes <- function(
     scd.object,
-    cluster
+    cluster,
+    num_genes = 5
 ) {
   # Create the stripchart
   G <- nrow(scd.object$vals[[cluster]]$loadings)
-  up5 <- order(scd.object$vals[[cluster]]$beta.hat)[1:5]
-  down5 <- order(scd.object$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:5]
+  up_genes <- order(scd.object$vals[[cluster]]$beta.hat)[1:num_genes]
+  down_genes <- order(scd.object$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:num_genes]
   color <- rep("normal", G)
-  color[up5] <- "up"; color[down5] <- "down"
+  color[up_genes] <- "up"; color[down_genes] <- "down"
 
-  label <- ifelse(1:G %in% c(up5,down5), scd.object$gene.names, "")
+  label <- ifelse(1:G %in% c(up_genes,down_genes), scd.object$gene.names, "")
 
   data <- data.frame(value=scd.object$vals[[cluster]]$beta.hat,
                      color=color,
