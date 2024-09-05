@@ -66,7 +66,6 @@ FDRDistPlot <- function(
   p <- p + xlab("Estimated distance")
   p <- p + ylab("-log10 FDR")
   p <- p + guides(color="none",alpha="none")
-  print(p)
 
   out <- list()
   out$plot <- p
