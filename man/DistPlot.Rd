@@ -4,14 +4,13 @@
 \alias{DistPlot}
 \title{Plot the results of scDist}
 \usage{
-DistPlot(scd.object, return.plot = FALSE)
+DistPlot(scd.object)
 }
 \arguments{
 \item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
 }
 \value{
-If return.plot is true, a ggplot object is returned. Otherwise,
-nothing is returned.
+A `ggplot2` object
 }
 \description{
 Plot the distance estimates and corresponding standard
