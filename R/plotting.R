@@ -40,6 +40,9 @@ DistPlot <- function(
 #' ADD DESCRIPTION HERE
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
+#' @param sig_color color to use for points and text of clusters with FDR > 1 (default is "orange").
+#' @param nonsig_color color to use for points and text of clusters with FDR < 1 (default is "grey").
+#' @param sig_line_color color to use for dashed line indicating FDR = 1 (default is "blue").
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
@@ -48,19 +51,22 @@ DistPlot <- function(
 
 FDRDistPlot <- function(
     scd.object,
+    sig_color = "orange",
+    nonsig_color = "grey",
+    sig_line_color = "blue"
 ) {
   p.value <- p.adjust(scd.object$results$p.val,method="fdr")
   dist <- scd.object$results$Dist.
 
   df <- data.frame(x=dist,y=-log10(p.value))
-  df$color <- ifelse(df$y > 1, "orange", "grey")
+  df$color <- ifelse(df$y > 1, sig_color, nonsig_color)
   df$label <- rownames(scd.object$results)
 
   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
-  p <- p + scale_color_manual(values=c("grey","orange"))
+  p <- p + scale_color_manual(values=c(nonsig_color,sig_color))
   p <- p + geom_point()
   p <- p + geom_text_repel(max.overlaps=Inf)
-  p <- p + geom_hline(yintercept=1,color="blue",
+  p <- p + geom_hline(yintercept=1,color=sig_line_color,
                       linetype="dashed")
   p <- p + theme_linedraw()
   p <- p + xlab("Estimated distance")
