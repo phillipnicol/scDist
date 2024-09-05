@@ -156,7 +156,7 @@ distGenes <- function(
                    label=label)) +
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
-    ggrepel::geom_text_repel(max.overlaps=Inf) +
+    geom_text_repel(max.overlaps=Inf) +
     labs(x = NULL, y = "Condition difference") +
     coord_flip()+
     guides(color="none") +
