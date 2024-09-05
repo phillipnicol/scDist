@@ -12,7 +12,6 @@ NULL
 #' errors
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
-#' @param return.plot If true, return the ggplot object
 #'
 #' @return If return.plot is true, a ggplot object is returned. Otherwise,
 #' nothing is returned.
@@ -38,11 +37,8 @@ DistPlot <- function(
   p <- p + xlab("Cell type")+ylab("Dist.")
   p <- p + theme_linedraw()
   p <- p + coord_flip()
-  print(p)
 
-  if(return.plot) {
-    return(p)
-  }
+  return(p)
 }
 
 #' FDRDistPlot
