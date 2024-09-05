@@ -47,7 +47,7 @@ DistPlot <- function(
 #' @export
 
 FDRDistPlot <- function(
-    scd.object
+    scd.object,
 ) {
   p.value <- p.adjust(scd.object$results$p.val,method="fdr")
   dist <- scd.object$results$Dist.
@@ -66,9 +66,6 @@ FDRDistPlot <- function(
   p <- p + xlab("Estimated distance")
   p <- p + ylab("-log10 FDR")
   p <- p + guides(color="none",alpha="none")
-
-  out <- list()
-  out$plot <- p
 
   return(out)
 }
