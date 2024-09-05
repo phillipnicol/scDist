@@ -11,14 +11,18 @@ NULL
 #' @description Plot the distance estimates and corresponding standard
 #' errors
 #'
-#' @param scd.object A list obtained from applying the main function scDist.
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param return.plot If true, return the ggplot object
 #'
-#' @return If return.plot is true, a gglot object is retured. Otherwise,
+#' @return If return.plot is true, a ggplot object is returned. Otherwise,
 #' nothing is returned.
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
-DistPlot <- function(scd.object, return.plot=FALSE) {
+
+DistPlot <- function(
+    scd.object,
+    return.plot=FALSE
+) {
   results <- scd.object$results
   results <- results[order(results$Dist.,decreasing=FALSE),]
 
@@ -41,9 +45,17 @@ DistPlot <- function(scd.object, return.plot=FALSE) {
   }
 }
 
-
+#' FDRDistPlot
+#'
+#' ADD DESCRIPTION HERE
+#'
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
+#'
 #' @export
-FDRDistPlot <- function(scd.object) {
+
+FDRDistPlot <- function(
+    scd.object
+) {
   p.value <- p.adjust(scd.object$results$p.val,method="fdr")
   dist <- scd.object$results$Dist.
 
@@ -52,7 +64,7 @@ FDRDistPlot <- function(scd.object) {
   df$label <- rownames(scd.object$results)
 
   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
-  p <- p+scale_color_manual(values=c("grey","orange"))
+  p <- p + scale_color_manual(values=c("grey","orange"))
   p <- p + geom_point()
   p <- p + ggrepel::geom_text_repel(max.overlaps=Inf)
   p <- p + geom_hline(yintercept=1,color="blue",
@@ -65,13 +77,23 @@ FDRDistPlot <- function(scd.object) {
 
   out <- list()
   out$plot <- p
-  out
+
+  return(out)
 }
 
-
-
+#' plotBetas
+#'
+#' ADD DESCRIPTION HERE
+#'
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
+#' @param cluster The cluster to make the plot for
+#'
 #' @export
-plotBetas <- function(scd.object, cluster) {
+
+plotBetas <- function(
+    scd.object,
+    cluster
+) {
   ix <- which(names(scd.object$vals) == cluster)
   df <- data.frame(beta=scd.object$vals[[ix]]$beta,
                    p=scd.object$vals[[ix]]$p.sum)
@@ -100,9 +122,6 @@ plotBetas <- function(scd.object, cluster) {
   return(p)
 }
 
-# Load the required package
-library(ggplot2)
-
 # Create a sample dataset
 set.seed(123)
 data <- data.frame(
@@ -116,13 +135,17 @@ data <- data.frame(
 #' @description Plot the distance estimates and corresponding standard
 #' errors
 #'
-#' @param scd.object A list obtained from applying the main function scDist.
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
 #'
 #' @return A `ggplot2` object containing the plot
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
-distGenes <- function(scd.object, cluster) {
+
+distGenes <- function(
+    scd.object,
+    cluster
+) {
   # Create the stripchart
   G <- nrow(scd.object$vals[[cluster]]$loadings)
   up5 <- order(scd.object$vals[[cluster]]$beta.hat)[1:5]
@@ -144,6 +167,5 @@ distGenes <- function(scd.object, cluster) {
     coord_flip()+
     guides(color="none") +
     theme_bw()
-  #print(p)
   return(p)
 }
