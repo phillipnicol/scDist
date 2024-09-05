@@ -4,10 +4,21 @@
 \alias{FDRDistPlot}
 \title{FDRDistPlot}
 \usage{
-FDRDistPlot(scd.object)
+FDRDistPlot(
+  scd.object,
+  sig_color = "orange",
+  nonsig_color = "grey",
+  sig_line_color = "blue"
+)
 }
 \arguments{
 \item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
+
+\item{sig_color}{color to use for points and text of clusters with FDR > 1 (default is "orange").}
+
+\item{nonsig_color}{color to use for points and text of clusters with FDR < 1 (default is "grey").}
+
+\item{sig_line_color}{color to use for dashed line indicating FDR = 1 (default is "blue").}
 }
 \description{
 ADD DESCRIPTION HERE
