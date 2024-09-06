@@ -4,12 +4,14 @@
 \alias{distGenes}
 \title{Plot the direction of the perturbation}
 \usage{
-distGenes(scd.object, cluster)
+distGenes(scd.object, cluster, num_genes = 5)
 }
 \arguments{
-\item{scd.object}{A list obtained from applying the main function scDist.}
+\item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
 
 \item{cluster}{The cluster to make the plot for}
+
+\item{num_genes}{number of up/down genes to plot, default is 5.}
 }
 \value{
 A `ggplot2` object containing the plot

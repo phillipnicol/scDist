@@ -2,6 +2,7 @@
 % Please edit documentation in R/scDist.R, R/zzz.R
 \docType{package}
 \name{scDist}
+\alias{scDist-package}
 \alias{scDist}
 \title{scDist: Identify perturbed cell types in
 single-cell RNA-seq data}
