@@ -15,7 +15,7 @@ Imports:
     ggraph,
     Seurat,
     data.table,
-    ggrepel,
+    ggrepel (>= 0.9.6),
     lme4,
     ashr
 Encoding: UTF-8
