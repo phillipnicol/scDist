@@ -1,7 +1,7 @@
 Package: scDist
 Type: Package
 Title: Robust Identification of Perturbed Cell Types in Single-cell RNA-seq 
-Version: 1.1.1
+Version: 1.1.2
 Date: 2024-07-10
 Author: Phillip B. Nicol
 Maintainer: Phillip B. Nicol <philnicol740@gmail.com>
@@ -15,8 +15,9 @@ Imports:
     ggraph,
     Seurat,
     data.table,
-    ggrepel,
-    lme4
+    ggrepel (>= 0.9.6),
+    lme4,
+    ashr
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

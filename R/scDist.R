@@ -31,7 +31,13 @@
 #' included.
 #' }
 #'
+#' @importFrom irlba prcomp_irlba
+#' @importFrom lmerTest lmer
+#' @importFrom lme4 lmerControl
+#' @importFrom ashr ash get_post_sample
+#'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
+
 scDist <- function(normalized_counts,
                    meta.data,
                    fixed.effects,
@@ -41,11 +47,21 @@ scDist <- function(normalized_counts,
                    truncate=FALSE,
                    min.counts.per.cell=20,
                    weights=NULL) {
+
+  # Check for matrix format
+  if (!inherits(x = normalized_counts, what = "matrix")) {
+    message("`normalized_counts` is not a matrix, converting now.")
+    normalized_counts <- as.matrix(x = normalized_counts)
+  }
+
+  if (is.null(x = rownames(x = normalized_counts))) {
+    stop("`normalized_counts` does not contain features as rownames.  Ensure feature names are present as rownames before running `scDist`.")
+  }
+
   #Normalized counts currently in cells x genes
   normalized_counts <- t(normalized_counts)
 
   G <- ncol(normalized_counts)
-  print(G)
 
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)
@@ -89,7 +105,7 @@ scDist <- function(normalized_counts,
     if(length(ix) < min.counts.per.cell) {
       next
     }
-    pca.sub <- irlba::prcomp_irlba(x=normalized_counts.sub,n=d)
+    pca.sub <- prcomp_irlba(x=normalized_counts.sub,n=d)
     if(!is.null(weights)) {
       weighted.U <- pca.sub$rotation * sqrt(weights)
       weighted.scores <- normalized_counts.sub %*% weighted.U
@@ -133,8 +149,8 @@ pcDiff <- function(pca,
   for(i in 1:d) {
     data$y <- pca$x[,i]
     if(RE) {
-      fit <- lmerTest::lmer(formula=design,data=data,REML=TRUE,
-                  control = lme4::lmerControl(check.conv.singular="ignore"))
+      fit <- lmer(formula=design,data=data,REML=TRUE,
+                  control = lmerControl(check.conv.singular="ignore"))
       sumfit <- summary(fit)
       dfs[i] <- sumfit$coefficients[2,3]
       dfs[i] <- sumfit$coefficients[2,3]
@@ -148,8 +164,8 @@ pcDiff <- function(pca,
     beta_sd[i] <- sumfit$coefficients[2,2]
   }
 
-  beta.ash <- ashr::ash(betahat=beta,sebetahat = beta_sd)
-  beta.post <- ashr::get_post_sample(beta.ash,10^4)
+  beta.ash <- ash(betahat=beta,sebetahat = beta_sd)
+  beta.post <- get_post_sample(beta.ash,10^4)
   D.post <- apply(beta.post,1,function(b) {
     sqrt(sum(b^2))
   })

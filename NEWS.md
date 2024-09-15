@@ -1,3 +1,7 @@
+## Version 1.1.2 September 15, 2024
+
+This update improves the functions in `plotting.R`, adds input checking to `scDist()`, and adds some missing documentation. See PR 8 and 10. 
+
 ## Version 1.1.1 September 4, 2024
 
 This update primarily addresses bugs in `distGenes`.

@@ -1,9 +1,3 @@
-#' @import ggplot2
-NULL
-
-#' @importFrom ggrepel geom_text_repel
-NULL
-
 #' @export
 #'
 #' @title Plot the results of scDist
@@ -11,14 +5,17 @@ NULL
 #' @description Plot the distance estimates and corresponding standard
 #' errors
 #'
-#' @param scd.object A list obtained from applying the main function scDist.
-#' @param return.plot If true, return the ggplot object
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #'
-#' @return If return.plot is true, a gglot object is retured. Otherwise,
-#' nothing is returned.
+#' @return A `ggplot2` object
+#'
+#' @import ggplot2
 #'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
-DistPlot <- function(scd.object, return.plot=FALSE) {
+
+DistPlot <- function(
+    scd.object
+) {
   results <- scd.object$results
   results <- results[order(results$Dist.,decreasing=FALSE),]
 
@@ -34,44 +31,83 @@ DistPlot <- function(scd.object, return.plot=FALSE) {
   p <- p + xlab("Cell type")+ylab("Dist.")
   p <- p + theme_linedraw()
   p <- p + coord_flip()
-  print(p)
 
-  if(return.plot) {
-    return(p)
-  }
+  return(p)
 }
 
-
+#' @title Plot the estimated distances and corresponding p-values.
+#'
+#' @description
+#' Plots the estimated distances and corresponding p-values.
+#'
+#'
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
+#' @param sig_color color to use for points and text of clusters with FDR > 1 (default is "orange").
+#' @param nonsig_color color to use for points and text of clusters with FDR < 1 (default is "grey").
+#' @param sig_line_color color to use for dashed line indicating FDR = 1 (default is "blue").
+#'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
+#'
+#' @details
+#' It should be noted that the p-value computation
+#' and distance estimation are separate procedures, so it will not
+#' necessarily be the case that a distance of 0 corresponds to a
+#' non-significant p-value.
+#'
+#'
 #' @export
-FDRDistPlot <- function(scd.object) {
+
+FDRDistPlot <- function(
+    scd.object,
+    sig_color = "orange",
+    nonsig_color = "grey",
+    sig_line_color = "blue"
+) {
   p.value <- p.adjust(scd.object$results$p.val,method="fdr")
   dist <- scd.object$results$Dist.
 
   df <- data.frame(x=dist,y=-log10(p.value))
-  df$color <- ifelse(df$y > 1, "orange", "grey")
+  df$color <- ifelse(df$y > 1, sig_color, nonsig_color)
   df$label <- rownames(scd.object$results)
 
   p <- ggplot(df,aes(x=x,y=y,color=color,label=label))
-  p <- p+scale_color_manual(values=c("grey","orange"))
+  p <- p + scale_color_manual(values=c(nonsig_color,sig_color))
   p <- p + geom_point()
-  p <- p + ggrepel::geom_text_repel(max.overlaps=Inf)
-  p <- p + geom_hline(yintercept=1,color="blue",
+  p <- p + geom_text_repel(max.overlaps=Inf)
+  p <- p + geom_hline(yintercept=1,color=sig_line_color,
                       linetype="dashed")
   p <- p + theme_linedraw()
   p <- p + xlab("Estimated distance")
   p <- p + ylab("-log10 FDR")
   p <- p + guides(color="none",alpha="none")
-  print(p)
 
-  out <- list()
-  out$plot <- p
-  out
+  return(p)
 }
 
-
-
+#' @title Plot the estimate difference in each PC.
+#'
+#' @description
+#' Plots the estimated change in each PC.
+#'
+#'
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
+#' @param cluster The cluster to make the plot for
+#'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
+#'
+#' @details scDist fits a linear model to each PC direction. The effect
+#' of interest is plotted (as a function of PC) with this function.
+#'
+#'
+#'
 #' @export
-plotBetas <- function(scd.object, cluster) {
+
+plotBetas <- function(
+    scd.object,
+    cluster
+) {
   ix <- which(names(scd.object$vals) == cluster)
   df <- data.frame(beta=scd.object$vals[[ix]]$beta,
                    p=scd.object$vals[[ix]]$p.sum)
@@ -88,26 +124,18 @@ plotBetas <- function(scd.object, cluster) {
     }
     else {" "}
   })
-  p <- ggplot2::ggplot(df,ggplot2::aes(x=dim,y=beta))
-  p <- p + geom_segment(ggplot2::aes(x=dim,xend=dim,y=0,yend=beta))
-  p <- p + ggplot2::geom_point(size=2,color="purple")
+  p <- ggplot(df,aes(x=dim,y=beta))
+  p <- p + geom_segment(aes(x=dim,xend=dim,y=0,yend=beta))
+  p <- p + geom_point(size=2,color="purple")
   #df$beta <- ifelse(df$beta > 0, df$beta+0.35, df$beta-0.35)
-  #p <- p + ggplot2::geom_text(data=df, ggplot2::aes(label=signif,x=dim,y=beta))
-  p <- p + ggplot2::labs(x="PC Dimension", y=expression(U*beta[k]))
-  p <- p + ggplot2::ggtitle(label=cluster)
-  p <- p + ggplot2::theme_linedraw()
+  #p <- p + geom_text(data=df, aes(label=signif,x=dim,y=beta))
+  p <- p + labs(x="PC Dimension", y=expression(U*beta[k]))
+  p <- p + ggtitle(label=cluster)
+  p <- p + theme_linedraw()
   p
   return(p)
 }
 
-# Load the required package
-library(ggplot2)
-
-# Create a sample dataset
-set.seed(123)
-data <- data.frame(
-  value = rnorm(20, mean = 10, sd = 2)
-)
 
 #' @export
 #'
@@ -116,21 +144,30 @@ data <- data.frame(
 #' @description Plot the distance estimates and corresponding standard
 #' errors
 #'
-#' @param scd.object A list obtained from applying the main function scDist.
+#' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
+#' @param num_genes number of up/down genes to plot, default is 5.
 #'
 #' @return A `ggplot2` object containing the plot
 #'
+#' @import ggplot2
+#' @importFrom ggrepel geom_text_repel
+#'
 #' @author Phillip B. Nicol <philnicol740@gmail.com>
-distGenes <- function(scd.object, cluster) {
+
+distGenes <- function(
+    scd.object,
+    cluster,
+    num_genes = 5
+) {
   # Create the stripchart
   G <- nrow(scd.object$vals[[cluster]]$loadings)
-  up5 <- order(scd.object$vals[[cluster]]$beta.hat)[1:5]
-  down5 <- order(scd.object$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:5]
+  up_genes <- order(scd.object$vals[[cluster]]$beta.hat)[1:num_genes]
+  down_genes <- order(scd.object$vals[[cluster]]$beta.hat,decreasing=TRUE)[1:num_genes]
   color <- rep("normal", G)
-  color[up5] <- "up"; color[down5] <- "down"
+  color[up_genes] <- "up"; color[down_genes] <- "down"
 
-  label <- ifelse(1:G %in% c(up5,down5), scd.object$gene.names, "")
+  label <- ifelse(1:G %in% c(up_genes,down_genes), scd.object$gene.names, "")
 
   data <- data.frame(value=scd.object$vals[[cluster]]$beta.hat,
                      color=color,
@@ -139,11 +176,10 @@ distGenes <- function(scd.object, cluster) {
                    label=label)) +
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
-    ggrepel::geom_text_repel(max.overlaps=Inf) +
-    labs(x = NULL, y = "Condition difference") +
+    geom_text_repel(max.overlaps=Inf) +
     coord_flip()+
+    labs(x = NULL, y = "Condition difference") +
     guides(color="none") +
     theme_bw()
-  #print(p)
   return(p)
 }

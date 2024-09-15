@@ -7,7 +7,7 @@ library(ggplot2)
 ### Download the Wilk et al data
 ###Sco <- readRDS("wilk_covid.RDS")
 
-Sco <- Sco[,Sco$Donor == "Healthy"]
+Sco <- Sco[,Sco$Status == "Healthy"]
 
 nc <- length(unique(Sco$cell.type.coarse))
 set.seed(4589)
