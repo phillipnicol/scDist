@@ -8,17 +8,17 @@ simCellType <- function(D,tau,G=1000,N1=5,N2=5,J=50,label="A",my.pi=0.9) {
   beta_true <- D/sqrt(sum(beta_true^2))*beta_true
 
   y <- matrix(0, nrow=(N1+N2)*J,ncol=G)
-  ct.mean <- rnorm(n=1, mean=0, sd=10)
+  #ct.mean <- rnorm(n=1, mean=0, sd=10)
   for(i in 1:G) {
     cntr <- 1
     for(j in 1:N1) {
       omega <- rnorm(1,mean=0,sd=tau)
-      y[cntr:(cntr+J-1),i] <- omega+rnorm(J, mean=ct.mean)
+      y[cntr:(cntr+J-1),i] <- omega+rnorm(J)
       cntr <- cntr+J
     }
     for(j in 1:N2) {
       omega <- rnorm(1,mean=0, sd=tau)
-      y[cntr:(cntr+J-1),i] <- beta_true[i]+omega+rnorm(J, mean=ct.mean)
+      y[cntr:(cntr+J-1),i] <- beta_true[i]+omega+rnorm(J)
       cntr <- cntr+J
     }
   }
