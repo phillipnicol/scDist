@@ -35,9 +35,11 @@ DistPlot <- function(
   return(p)
 }
 
-#' FDRDistPlot
+#' @title Plot the estimated distances and corresponding p-values.
 #'
-#' ADD DESCRIPTION HERE
+#' @description
+#' Plots the estimated distances and corresponding p-values.
+#'
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param sig_color color to use for points and text of clusters with FDR > 1 (default is "orange").
@@ -46,6 +48,13 @@ DistPlot <- function(
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
+#'
+#' @details
+#' It should be noted that the p-value computation
+#' and distance estimation are separate procedures, so it will not
+#' necessarily be the case that a distance of 0 corresponds to a
+#' non-significant p-value.
+#'
 #'
 #' @export
 
@@ -76,15 +85,22 @@ FDRDistPlot <- function(
   return(p)
 }
 
-#' plotBetas
+#' @title Plot the estimate difference in each PC.
 #'
-#' ADD DESCRIPTION HERE
+#' @description
+#' Plots the estimated change in each PC.
+#'
 #'
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
 #'
 #' @import ggplot2
 #' @importFrom ggrepel geom_text_repel
+#'
+#' @details scDist fits a linear model to each PC direction. The effect
+#' of interest is plotted (as a function of PC) with this function.
+#'
+#'
 #'
 #' @export
 
@@ -161,8 +177,8 @@ distGenes <- function(
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
     scale_color_manual(values=c("red", "grey90", "blue")) +
     geom_text_repel(max.overlaps=Inf) +
-    labs(x = NULL, y = "Condition difference") +
     coord_flip()+
+    labs(x = NULL, y = "Condition difference") +
     guides(color="none") +
     theme_bw()
   return(p)

@@ -62,7 +62,6 @@ scDist <- function(normalized_counts,
   normalized_counts <- t(normalized_counts)
 
   G <- ncol(normalized_counts)
-  print(G)
 
   # Save relevant info to variables
   design <- makeDesign(fixed.effects,random.effects)

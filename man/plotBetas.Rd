@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{plotBetas}
 \alias{plotBetas}
-\title{plotBetas}
+\title{Plot the estimate difference in each PC.}
 \usage{
 plotBetas(scd.object, cluster)
 }
@@ -12,5 +12,9 @@ plotBetas(scd.object, cluster)
 \item{cluster}{The cluster to make the plot for}
 }
 \description{
-ADD DESCRIPTION HERE
+Plots the estimated change in each PC.
+}
+\details{
+scDist fits a linear model to each PC direction. The effect
+of interest is plotted (as a function of PC) with this function.
 }

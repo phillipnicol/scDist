@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{FDRDistPlot}
 \alias{FDRDistPlot}
-\title{FDRDistPlot}
+\title{Plot the estimated distances and corresponding p-values.}
 \usage{
 FDRDistPlot(
   scd.object,
@@ -21,5 +21,11 @@ FDRDistPlot(
 \item{sig_line_color}{color to use for dashed line indicating FDR = 1 (default is "blue").}
 }
 \description{
-ADD DESCRIPTION HERE
+Plots the estimated distances and corresponding p-values.
+}
+\details{
+It should be noted that the p-value computation
+and distance estimation are separate procedures, so it will not
+necessarily be the case that a distance of 0 corresponds to a
+non-significant p-value.
 }
