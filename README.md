@@ -1,7 +1,7 @@
 scDist: Robust identification of perturbed cell types in single-cell
 RNA-seq data
 ================
-R package version 1.1.2
+R package version 1.1.3
 
 ## System Requirements
 
@@ -59,6 +59,7 @@ out <- scDist(sim$Y,sim$meta.data,fixed.effects = "response",
               clusters="clusters")
 ```
 
+    ## [1] 1000
     ## ================================================================================
 
 The results data frame gives a summary of the estimated distance and
