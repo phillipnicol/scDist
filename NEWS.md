@@ -1,3 +1,7 @@
+## Version 1.1.3 October 21, 2024
+
+This update adds code to automatically skip cell types where any fixed or random effects have only one sampling level. 
+
 ## Version 1.1.2 September 15, 2024
 
 This update improves the functions in `plotting.R`, adds input checking to `scDist()`, and adds some missing documentation. See PR 8 and 10. 
