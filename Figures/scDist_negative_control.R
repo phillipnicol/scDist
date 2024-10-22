@@ -168,7 +168,7 @@ p
 
 
 
-expr <- Sco@assays$SCT[Sco@assays$SCT@var.features,]
+#expr <- Sco@assays$SCT[Sco@assays$SCT@var.features,]
 
 cell.types <- unique(Sco$cell.type.fine)
 
@@ -194,6 +194,7 @@ for(i in 1:nc) {
                     random.effects="samples",
                     clusters="cluster")
       D[i,j] <- out$results$Dist.
+      print(D[i,j])
     })
   }
 }

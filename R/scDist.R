@@ -18,7 +18,7 @@
 #' @param clusters The column containing the cell-type annotation.
 #' @param d The number of PCs to use.
 #' @param truncate Whether or not to round negative distances to 0.
-#' @param min.counts.per.cell The minimum number of cells per cluster to perform the estimation.
+#' @param min.count.per.cell The minimum number of cells per cluster to perform the estimation.
 #' @param weights An optional vector of length equal to the number of genes specifying the weight
 #' to place on each gene in the distance estimate.
 #'
@@ -45,7 +45,7 @@ scDist <- function(normalized_counts,
                    clusters,
                    d=20,
                    truncate=FALSE,
-                   min.counts.per.cell=20,
+                   min.count.per.cell=20,
                    weights=NULL) {
 
   # Check for matrix format
@@ -87,6 +87,12 @@ scDist <- function(normalized_counts,
     #weights <- sqrt(ncol(normalized_counts))*weights/(sqrt(sum(weights^2)))
   }
 
+  if(min.count.per.cell < d) {
+    warning("min.count.per.cell must be at least d, setting min.count.per.cell
+            to d.")
+    min.count.per.cell <- d
+  }
+
   clusters <- meta.data[[clusters]]
   all_clusters <- sort(unique(clusters))
   distances <- c()
@@ -102,7 +108,7 @@ scDist <- function(normalized_counts,
     ix <- which(clusters==i)
     normalized_counts.sub <- normalized_counts[ix,]
     #pca.sub <- prcomp(normalized_counts.sub)
-    if(length(ix) < min.counts.per.cell) {
+    if(length(ix) < min.count.per.cell) {
       next
     }
     pca.sub <- prcomp_irlba(x=normalized_counts.sub,n=d)
@@ -112,6 +118,11 @@ scDist <- function(normalized_counts,
       pca.sub$x <- weighted.scores
     }
     data.sub <- data[ix,]
+    if(check_effects(data.sub)) {
+      warning(paste0("Skipping cluster ", i,
+                     " that has only one sampled level for a fixed or random effect."))
+      next
+    }
     vals <- pcDiff(pca.sub,data.sub,design,design.null,d,RE,truncate)
     vals$loadings <- pca.sub$rotation
     beta.hat <- pca.sub$rotation %*% vals$beta
@@ -121,9 +132,10 @@ scDist <- function(normalized_counts,
                        vals$D.post.lb,
                        vals$D.post.ub,
                        vals$p.sum))
+    rownames(res)[nrow(res)] <- i
   }
   res <- as.data.frame(res)
-  rownames(res) <- all_clusters
+  #rownames(res) <- all_clusters
   colnames(res) <- c("Dist.",
                      "95% CI (low)",
                      "95% CI (upper)",
@@ -240,3 +252,10 @@ makeDesign <- function(fixed.effects, random.effects) {
   }
   as.formula(design)
 }
+
+check_effects <- function(data) {
+  data.test <- subset(data,select=-y)
+  levels <- apply(data.test, 2, function(x) length(table(x)))
+  ifelse(any(levels < 2), TRUE, FALSE)
+}
+
