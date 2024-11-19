@@ -59,7 +59,6 @@ out <- scDist(sim$Y,sim$meta.data,fixed.effects = "response",
               clusters="clusters")
 ```
 
-    ## [1] 1000
     ## ================================================================================
 
 The results data frame gives a summary of the estimated distance and
