@@ -1,7 +1,7 @@
 scDist: Robust identification of perturbed cell types in single-cell
 RNA-seq data
 ================
-R package version 1.1.3
+R package version 1.1.4
 
 ## System Requirements
 
