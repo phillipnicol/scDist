@@ -1,3 +1,8 @@
+## Version 1.1.4 November 24, 2024
+
+This update adds labels to `distGenes` to help users better interpret the 
+direction of the expression change for each gene.
+
 ## Version 1.1.3 October 21, 2024
 
 This update adds code to automatically skip cell types where any fixed or random effects have only one sampling level. 

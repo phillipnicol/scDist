@@ -147,6 +147,8 @@ plotBetas <- function(
 #' @param scd.object A list obtained from applying the main function \code{\link{scDist}}.
 #' @param cluster The cluster to make the plot for
 #' @param num_genes number of up/down genes to plot, default is 5.
+#' @param add_reference_group If TRUE add annotation for reference group.
+#' If the condition (main effect) is not binary this should be set to FALSE.
 #'
 #' @return A `ggplot2` object containing the plot
 #'
@@ -158,8 +160,9 @@ plotBetas <- function(
 distGenes <- function(
     scd.object,
     cluster,
-    num_genes = 5
-) {
+    num_genes = 5,
+    add_reference_group=TRUE) {
+
   # Create the stripchart
   G <- nrow(scd.object$vals[[cluster]]$loadings)
   up_genes <- order(scd.object$vals[[cluster]]$beta.hat)[1:num_genes]
@@ -172,6 +175,15 @@ distGenes <- function(
   data <- data.frame(value=scd.object$vals[[cluster]]$beta.hat,
                      color=color,
                      label=label)
+
+  ### Right now this code only works for binary conditions
+  main.effect <- scd.object$vals[[cluster]]$data[,1]
+  if(is.factor(main.effect)) {
+    reference <- levels(main.effect)[2]
+  } else{
+    reference <- levels(as.factor(main.effect))[2]
+  }
+
   p <- ggplot(data, aes(x = "", y = value, color=color,
                    label=label)) +
     geom_jitter(width = 0.01, alpha = 0.5) +  # Add jittered points
@@ -179,7 +191,15 @@ distGenes <- function(
     geom_text_repel(max.overlaps=Inf) +
     coord_flip()+
     labs(x = NULL, y = "Condition difference") +
-    guides(color="none") +
-    theme_bw()
+    guides(color="none")
+
+  if(add_reference_group) {
+    p <- p+annotate("text", x = 0.5, y = min(data$value) - (diff(range(data$value)) * 0.1),
+                      label = paste("Lower in", reference), hjust = 0, size = 4) +
+      annotate("text", x = 0.5, y = max(data$value) + (diff(range(data$value)) * 0.1),
+               label = paste("Higher in", reference), hjust = 1, size = 4)
+  }
+
+  p <- p + theme_bw()
   return(p)
 }
