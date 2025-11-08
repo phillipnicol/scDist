@@ -34,8 +34,10 @@ condition_v_celltype_distance <- function(normalized_counts,
                                           clusters,
                                           d=20,
                                           truncate=FALSE,
-                                          min.counts.per.cell=20,
+                                          min.count.per.cell=20,
                                           weights=NULL) {
+  require(tidyverse)
+
   out.full <- scDist(normalized_counts=normalized_counts,
                      meta.data = meta.data,
                      fixed.effects = fixed.effects,
@@ -43,7 +45,7 @@ condition_v_celltype_distance <- function(normalized_counts,
                      clusters = clusters,
                      d=d,
                      truncate=truncate,
-                     min.counts.per.cell=min.counts.per.cell,
+                     min.count.per.cell=min.count.per.cell,
                      weights = weights)
 
   meta.data$cell.type <- meta.data[[clusters]]
@@ -72,19 +74,16 @@ condition_v_celltype_distance <- function(normalized_counts,
     }
   }
 
-
   rownames(D) <- cell.types
   colnames(D) <- rownames(D)
-  D <- D[rownames(out.full$results),rownames(out.full$results)]
-
+  out_names <- rownames(out.full[["results"]])
+  # D <- D[rownames(out.full$results),rownames(out.full$results)]
+  D <- D[out_names,out_names]
   D <- D + t(D)
+  D2 <- cbind(D, "condition"=out.full$results[out_names,"Dist."])
+  # colnames(D)[14] <- "condition"  ## this may cause error for fixed num
 
-  D <- cbind(D, out.full$results$Dist.)
-  colnames(D)[14] <- "condition"
-
-  df <- reshape2::melt(D)
-
-  library(tidyverse)
+  df <- reshape2::melt(D2)
 
   df.sub <- df |> filter(value > 10^{-10}) |>
     filter(Var1 != "condition") |>
@@ -95,11 +94,10 @@ condition_v_celltype_distance <- function(normalized_counts,
   p <- ggplot(data=df.sub,aes(x=Var1, y = value)) +
     geom_boxplot() +
     geom_jitter(width = 0.2, alpha = 0.5) +
-    geom_point(data=df.sub2, aes(x=Var1, y=value), pch="*",
-               color="red", size=5) +
+    geom_point(data=df.sub2, aes(x=Var1, y=value),#pch="*",
+               color="red", size=2) +
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     xlab("Cell type") + ylab("Distance")
-
   out <- list()
   out$D <- D
   out$plot <- p
