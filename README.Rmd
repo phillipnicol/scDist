@@ -1,12 +1,23 @@
 ---
 title: "scDist: Robust identification of perturbed cell types in single-cell RNA-seq data"
-author: "R package version 1.1.4"
+author: "R package version 1.1.5"
 output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+## Overview
+
+`scDist` is an R package that estimates the distance between cell populations in high-dimensional gene-expression space. It can be used to measure which cell types change the most between two experimental conditions (e.g., treated vs control). When there are multiple replicates (i.e., patients), `scDist` uses linear-mixed effects models to correct for sample-to-sample variability. 
+
+To run `scDist` you will need a normalized expression matrix and metadata assigning each cell to a condition and cluster. A simulated demo is provided below. 
+
+If you use `scDist` in your work, please cite:
+
+Nicol, P.B., Paulson, D., Qian, G., Liu, X.S., Irizarry, R.A.,  and Sahu, A.D. (2024). Robust identification of perturbed cell types in single-cell RNA-seq data. *Nature Communications*. Vol 15(7610). [https://doi.org/10.1038/s41467-024-51649-3](https://doi.org/10.1038/s41467-024-51649-3).
+
 
 ## System Requirements
 
@@ -67,13 +78,3 @@ To get a plot of genes that are associated with the perturbation use `distGenes`
 ```{r}
 distGenes(out, cluster = "a")
 ```
-
-
-
-## Reference
-
-If you use `scDist` in your work, please cite:
-
-Nicol, P.B., Paulson, D., Qian, G., Liu, X.S., Irizarry, R.A.,  and Sahu, A.D. (2024). Robust identification of perturbed cell types in single-cell RNA-seq data. *Nature Communications*. Vol 15(7610). [https://doi.org/10.1038/s41467-024-51649-3](https://doi.org/10.1038/s41467-024-51649-3).
-
-

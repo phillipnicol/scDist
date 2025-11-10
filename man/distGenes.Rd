@@ -4,7 +4,7 @@
 \alias{distGenes}
 \title{Plot the direction of the perturbation}
 \usage{
-distGenes(scd.object, cluster, num_genes = 5)
+distGenes(scd.object, cluster, num_genes = 5, add_reference_group = TRUE)
 }
 \arguments{
 \item{scd.object}{A list obtained from applying the main function \code{\link{scDist}}.}
@@ -12,6 +12,9 @@ distGenes(scd.object, cluster, num_genes = 5)
 \item{cluster}{The cluster to make the plot for}
 
 \item{num_genes}{number of up/down genes to plot, default is 5.}
+
+\item{add_reference_group}{If TRUE add annotation for reference group.
+If the condition (main effect) is not binary this should be set to FALSE.}
 }
 \value{
 A `ggplot2` object containing the plot

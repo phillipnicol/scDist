@@ -1,3 +1,7 @@
+## Version 1.1.5 November 10, 2025
+
+This update completes the code for `condition_v_celltype_distance()` based on Issue #11. 
+
 ## Version 1.1.4 November 24, 2024
 
 This update adds labels to `distGenes` to help users better interpret the 

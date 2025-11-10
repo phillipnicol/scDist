@@ -1,0 +1,24 @@
+citHeader("To cite scDist or its methodology, please use:")
+
+bibentry(
+  bibtype  = "Article",
+  title    = "Robust identification of perturbed cell types in single-cell RNA-seq data",
+  author   = c(
+    person("Phillip B.", "Nicol"),
+    person("Danielle", "Paulson"),
+    person("Gege", "Qian"),
+    person("X. Shirley", "Liu"),
+    person("Rafael", "Irizarry"),
+    person("Avinash D.", "Sahu")
+  ),
+  journal  = "Nature Communications",
+  year     = "2024",
+  volume   = "15",
+  number   = "1",
+  pages    = "7610",
+  note     = "doi:10.1038/s41467-024-51649-3",
+  textVersion =
+    "Nicol PB, Paulson D, Qian G, Liu XS, Irizarry R, and Sahu AD (2024).
+    Robust identification of perturbed cell types in single-cell RNA-seq data.
+    Nature Communications, 15(1):7610. https://doi.org/10.1038/s41467-024-51649-3"
+)

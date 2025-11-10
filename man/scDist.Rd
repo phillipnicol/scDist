@@ -15,7 +15,7 @@ scDist(
   clusters,
   d = 20,
   truncate = FALSE,
-  min.counts.per.cell = 20,
+  min.count.per.cell = 20,
   weights = NULL
 )
 }
@@ -38,7 +38,7 @@ In a typical use case this would be the column containing patient ID.}
 
 \item{truncate}{Whether or not to round negative distances to 0.}
 
-\item{min.counts.per.cell}{The minimum number of cells per cluster to perform the estimation.}
+\item{min.count.per.cell}{The minimum number of cells per cluster to perform the estimation.}
 
 \item{weights}{An optional vector of length equal to the number of genes specifying the weight
 to place on each gene in the distance estimate.}
